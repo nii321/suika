@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>スイカゲーム</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="main.js" defer></script>
+  <!-- スマホでの縦向き固定を推奨する -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #orientation-warning {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      font-size: 20px;
+      text-align: center;
+      line-height: 100vh;
+      z-index: 9999;
+    }
+    @media screen and (orientation: landscape) {
+      #orientation-warning {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ゲームコンテナ -->
+  <div id="game-container"></div>
+
+  <!-- 横向き時の警告メッセージ -->
+  <div id="orientation-warning">
+    縦向きでプレイしてください。
+  </div>
+</body>
+</html>
