@@ -1,8 +1,8 @@
-// Phaser.jsを使用するためのCDNを読み込む
-document.head.appendChild(Object.assign(document.createElement('script'), {
-  src: 'https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js',
-  onload: initGame
-}));
+// 直接initGame関数を呼び出す
+window.onload = function() {
+  initGame();
+};
+
 
 function initGame() {
   const config = {
