@@ -148,18 +148,31 @@ function initGame() {
     return fruit;
   }
 
-  function showGameOver() {
+   function showGameOver() {
     this.add.image(config.width / 2, config.height / 2, 'game-over')
       .setDisplaySize(config.width * 0.8, config.height * 0.5);
 
-    this.add.text(config.width / 2, config.height / -50)
-      .setOrigin(0.5)
-      .setStyle({
-        fontSize: '32px',
-        fill: '#fff'
-      })
-      .setText(`最終スコア：${score}`);
+    this.add.text(config.width / 2, config.height / 2 + 50, `最終スコア: ${score}`, {
+      fontSize: '32px',
+      fill: '#fff',
+      fontFamily: 'Arial'
+    }).setOrigin(0.5);
 
-    const restartButton = this.add.text(config.width / -100)
-      .setOrigin(0.5)
-      .setInteractive()
+    const restartButton = this.add.text(config.width / 2, config.height / 2 + 120, 'もう一度遊ぶ', {
+      fontSize: '28px',
+      fill: '#fff',
+      backgroundColor: '#4CAF50',
+      padding: {
+        left: 20,
+        right: 20,
+        top: 10,
+        bottom: 10
+      },
+      fontFamily: 'Arial'
+    }).setOrigin(0.5).setInteractive();
+
+    restartButton.on('pointerdown', function() {
+      location.reload();
+    });
+  }
+}
