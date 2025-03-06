@@ -11,6 +11,7 @@ body {
   background-color: #f0f0f0;
   overflow: hidden;
   touch-action: none; /* タッチ操作によるスクロールを防止 */
+  height: 100vh; /* bodyの高さを画面全体に設定 */
 }
 
 /* ゲームコンテナのスタイル */
@@ -18,10 +19,13 @@ body {
   width: 600px;
   height: 800px;
   display: flex;
-  justify-content: center; /* 垂直方向の中央寄せを維持 */
-  align-items: flex-start; /* 上端に寄せる */
+  justify-content: center;
+  align-items: center;
   background-color: #ffffff;
   margin: 0 auto;
+  position: relative; /* 相対位置指定 */
+  top: 50%; /* 垂直方向の中央に配置 */
+  transform: translateY(-50%); /* 垂直方向の中央に配置 */
 }
 
 /* ゲームキャンバスのスタイル */
