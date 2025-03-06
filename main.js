@@ -42,7 +42,7 @@ function initGame() {
 
   function preload() {
     // リポジトリ名を含むベースパスを設定
-const basePath = location.pathname.includes('/suika/') ? '/suika' : '';
+const basePath = location.pathname.includes('/<suika>/') ? '/suika' : '';
 
     // フルーツ画像の読み込み
     for (let i = 1; i <= 8; i++) {
