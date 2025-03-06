@@ -1,80 +1,21 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>スイカゲーム</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Phaserライブラリの追加 -->
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-  <script src="main.js" defer></script>
-  <!-- スマホでの縦向き固定を推奨する -->
-  <style>
-    /* 全体のリセットとボックスサイズの設定 */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    /* ボディ全体のスタイル */
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f0f0f0;
-      margin: 0;
-      padding: 0;
-      display: flex; /* フレックスボックスで中央配置 */
-      justify-content: center; /* 水平方向中央揃え */
-      align-items: center; /* 垂直方向中央揃え */
-      height: 100vh; /* ビューポート全体の高さ */
-      overflow: hidden;
-    }
-
-    /* ゲームコンテナ */
-    #game-container {
-      width: 100%; /* 必要に応じて固定幅（例：600px）に変更可能 */
-      height: 100%; /* 必要に応じて固定高さ（例：800px）に変更可能 */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* ゲームキャンバス */
-    canvas {
-      display: block;
-    }
-
-    /* 縦向き推奨メッセージのスタイル */
-    #orientation-warning {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      font-size: 24px;
-      text-align: center;
-      line-height: 100vh;
-      z-index: 9999;
-    }
-
-    /* 横向き時のみ警告メッセージを表示 */
-    @media screen and (orientation: landscape) {
-      #orientation-warning {
-        display: block;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スイカゲーム</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- ゲームコンテナ -->
-  <div id="game-container"></div>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="game-over" class="hidden">
+            <img src="assets/game-over.png" alt="ゲームオーバー" id="game-over-img">
+            <button id="restart-button">もう一度遊ぶ</button>
+        </div>
+    </div>
 
-  <!-- 横向き時の警告メッセージ -->
-  <div id="orientation-warning">
-    縦向きでプレイしてください。
-  </div>
+    <script src="main.js"></script>
 </body>
 </html>
+
