@@ -7,8 +7,8 @@ window.onload = function() {
 function initGame() {
   const config = {
     type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: 600, // 固定の幅
+    height: 800, // 固定の高さ
     backgroundColor: '#ffffff',
     physics: {
       default: 'matter',
@@ -41,16 +41,13 @@ function initGame() {
   let fruitColors = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3, 0xff1493];
 
   function preload() {
-
-
-
-   // フルーツ画像の読み込み
-  for (let i = 1; i <= 8; i++) {
-    this.load.image(`fruit${i}`, `assets/fruit${i}.png`); // 相対パスを使用
+    // フルーツ画像の読み込み
+    for (let i = 1; i <= 8; i++) {
+      this.load.image(`fruit${i}`, `assets/fruit${i}.png`); // 相対パスを使用
+    }
+    this.load.image('background', 'assets/background.png'); // 相対パスを使用
+    this.load.image('game-over', 'assets/game-over.png'); // 相対パスを使用
   }
-  this.load.image('background', 'assets/background.png'); // 相対パスを使用
-  this.load.image('game-over', 'assets/game-over.png'); // 相対パスを使用
-}
   function create() {
     // 背景画像
     this.add.image(config.width / 2, config.height / 2, 'background').setDisplaySize(config.width, config.height);
