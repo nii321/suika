@@ -41,17 +41,16 @@ function initGame() {
   let fruitColors = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3, 0xff1493];
 
   function preload() {
-    // リポジトリ名を含むベースパスを設定
-const basePath = location.pathname.includes('/suika/') ? '/suika' : '';
 
-    // フルーツ画像の読み込み
-    for (let i = 1; i <= 8; i++) {
-      this.load.image(`fruit${i}`, `assets/fruit${i}.png`);
-    }
-    this.load.image('background', 'assets/background.png');
-    this.load.image('game-over', 'assets/game-over.png');
+
+
+   // フルーツ画像の読み込み
+  for (let i = 1; i <= 8; i++) {
+    this.load.image(`fruit${i}`, `assets/fruit${i}.png`); // 相対パスを使用
   }
-
+  this.load.image('background', 'assets/background.png'); // 相対パスを使用
+  this.load.image('game-over', 'assets/game-over.png'); // 相対パスを使用
+}
   function create() {
     // 背景画像
     this.add.image(config.width / 2, config.height / 2, 'background').setDisplaySize(config.width, config.height);
