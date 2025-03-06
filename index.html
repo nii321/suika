@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スイカゲーム</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スイカゲーム</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-        <div id="game-over" class="hidden">
-            <img src="assets/game-over.png" alt="ゲームオーバー" id="game-over-img">
-            <button id="restart-button">もう一度遊ぶ</button>
-        </div>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    <div id="game-overlay" class="hidden">
+      <h1>ゲームオーバー</h1>
+      <button id="restart-button">もう一度遊ぶ</button>
     </div>
+  </div>
 
-    <script src="main.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
+
 
