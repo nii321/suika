@@ -8,15 +8,34 @@
 </head>
 <body>
   <div id="game-container">
-    <canvas id="game-canvas"></canvas>
-    <div id="game-overlay" class="hidden">
+    <!-- スコア表示 -->
+    <div id="score-board">
+      <h1>スコア: <span id="score">0</span></h1>
+    </div>
+
+    <!-- 次のフルーツ表示 -->
+    <div id="next-fruit">
+      <h2>次のフルーツ:</h2>
+      <img id="next-fruit-image" src="" alt="次のフルーツ">
+    </div>
+
+    <!-- プレイエリア -->
+    <div id="play-area">
+      <!-- 背景画像 -->
+      <img src="assets/background.png" alt="背景" class="background">
+    </div>
+
+    <!-- ゲームオーバー表示 -->
+    <div id="game-over" class="hidden">
       <h1>ゲームオーバー</h1>
-      <button id="restart-button">もう一度遊ぶ</button>
+      <button id="restart-button">リスタート</button>
     </div>
   </div>
 
+  <!-- JavaScriptファイルを読み込み -->
   <script src="main.js"></script>
 </body>
 </html>
+
 
 
