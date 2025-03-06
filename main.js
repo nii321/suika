@@ -94,8 +94,8 @@ function initGame() {
         }
 
         // ゲームオーバー判定
-        if ((bodyA.gameObject && bodyA.position.y < 120 && bodyA.velocity.y < 0.1) ||
-            (bodyB.gameObject && bodyB.position.y < 120 && bodyB.velocity.y < 0.1)) {
+        if ((bodyA.gameObject && bodyA.position.y < config.height * 0.15 && bodyA.velocity.y < 0.1) ||
+            (bodyB.gameObject && bodyB.position.y < config.height * 0.15 && bodyB.velocity.y < 0.1)) {
           gameOver = true;
           showGameOver.call(this);
         }
@@ -115,7 +115,7 @@ function initGame() {
   function prepareNextFruit() {
     const fruitType = Phaser.Math.Between(1, 3);
 
-    nextFruit = this.add.image(this.input.x, 50, `fruit${fruitType}`);
+    nextFruit = this.add.image(this.input.x, config.height * 0.05, `fruit${fruitType}`);
     nextFruit.setData('fruitType', fruitType);
     nextFruit.setAlpha(0.7);
   }
@@ -123,7 +123,7 @@ function initGame() {
   function dropFruit(x) {
     const fruitType = nextFruit.getData('fruitType');
 
-    createFruit.call(this, x, 120, fruitType);
+    createFruit.call(this, x, config.height * 0.15, fruitType);
 
     nextFruit.destroy();
 
@@ -152,5 +152,14 @@ function initGame() {
     this.add.image(config.width / 2, config.height / 2, 'game-over')
       .setDisplaySize(config.width * 0.8, config.height * 0.5);
 
-    this.add.text(config.width / 2, config.height / 2 + config.height * -50
+    this.add.text(config.width / 2, config.height / -50)
+      .setOrigin(0.5)
+      .setStyle({
+        fontSize: '32px',
+        fill: '#fff'
+      })
+      .setText(`最終スコア：${score}`);
 
+    const restartButton = this.add.text(config.width / -100)
+      .setOrigin(0.5)
+      .setInteractive()
