@@ -18,8 +18,8 @@ body {
   width: 600px;
   height: 800px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* 垂直方向の中央寄せを維持 */
+  align-items: flex-start; /* 上端に寄せる */
   background-color: #ffffff;
   margin: 0 auto;
 }
@@ -93,6 +93,3 @@ canvas {
   }
 }
 
-    display: block;
-  }
-}
