@@ -1,168 +1,102 @@
-window.onload = function() {
-  initGame();
-};
+// キャンバスとコンテキストの取得
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
 
+// キャンバスサイズを設定（スマホ対応）
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// ゲーム用変数
+const fruits = [];
+const fruitImages = [
+    "assets/fruit1.png", "assets/fruit2.png", "assets/fruit3.png",
+    "assets/fruit4.png", "assets/fruit5.png", "assets/fruit6.png",
+    "assets/fruit7.png", "assets/fruit8.png"
+];
+let isGameOver = false;
+
+// フルーツクラス
+class Fruit {
+    constructor(x, y, image) {
+        this.x = x;
+        this.y = y;
+        this.image = new Image();
+        this.image.src = image;
+        this.size = 50; // フルーツのサイズ
+        this.speed = Math.random() * 2 + 1; // 落下速度
+    }
+
+    draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
+    }
+
+    update() {
+        this.y += this.speed; // フルーツを下に移動
+        if (this.y > canvas.height) {
+            isGameOver = true; // フルーツが画面外に出たらゲームオーバー
+        }
+    }
+}
+
+// フルーツをランダムに生成する関数
+function spawnFruit() {
+    const x = Math.random() * (canvas.width - 50); // ランダムなX座標
+    const y = -50; // 画面上からスタート
+    const image = fruitImages[Math.floor(Math.random() * fruitImages.length)];
+    fruits.push(new Fruit(x, y, image));
+}
+
+// ゲームオーバー画面の表示
+function showGameOver() {
+    const gameOverDiv = document.getElementById("game-over");
+    gameOverDiv.classList.remove("hidden");
+}
+
+// ゲームの初期化
 function initGame() {
-  const config = {
-    type: Phaser.AUTO,
-    width: window.innerWidth, // ウィンドウ幅を取得
-    height: window.innerHeight, // ウィンドウ高さを取得
-    backgroundColor: '#ffffff',
-    physics: {
-      default: 'matter',
-      matter: {
-        gravity: { y: 1 },
-        debug: false,
-        setBounds: {
-          left: true,
-          right: true,
-          top: false,
-          bottom: true
-        }
-      }
-    },
-    scene: {
-      preload: preload,
-      create: create,
-      update: update
+    isGameOver = false;
+    fruits.length = 0;
+
+    // ゲームオーバー画面を非表示にする
+    const gameOverDiv = document.getElementById("game-over");
+    gameOverDiv.classList.add("hidden");
+
+    // フルーツを定期的に生成
+    setInterval(spawnFruit, 1000);
+}
+
+// ゲームループ
+function gameLoop() {
+    if (isGameOver) {
+        showGameOver();
+        return;
     }
-  };
 
-  const game = new Phaser.Game(config);
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
 
-  let score = 0;
-  let scoreText;
-  let nextFruit;
-  let canDrop = true;
-  let gameOver = false;
+    // 背景画像の描画（オプション）
+    const backgroundImage = new Image();
+    backgroundImage.src = "assets/background.png";
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-  function preload() {
-    // フルーツ画像の読み込み
-    for (let i = 1; i <= 8; i++) {
-      this.load.image(`fruit${i}`, `assets/fruit${i}.png`);
-    }
-    this.load.image('background', 'assets/background.png');
-    this.load.image('game-over', 'assets/game-over.png');
-  }
-
-  function create() {
-    // 背景画像
-    this.add.image(config.width / 2, config.height / 2, 'background').setDisplaySize(config.width, config.height);
-
-    // スコア表示
-    scoreText = this.add.text(10, 10, 'スコア: 0', { 
-      fontSize: '24px', 
-      fill: '#333',
-      fontFamily: 'Arial'
+    // フルーツの描画と更新
+    fruits.forEach((fruit) => {
+        fruit.update();
+        fruit.draw();
     });
 
-    // 次のフルーツを準備
-    prepareNextFruit.call(this);
+    requestAnimationFrame(gameLoop); // 次のフレームへ
+}
 
-    // タッチ/クリックイベントの設定
-    this.input.on('pointerdown', function(pointer) {
-      if (canDrop && !gameOver) {
-        dropFruit.call(this, pointer.x);
-      }
-    }, this);
+// 再スタートボタンのイベントリスナー
+document.getElementById("restart-button").addEventListener("click", () => {
+    initGame();
+});
 
-    // 衝突検出
-    this.matter.world.on('collisionstart', function(event) {
-      const pairs = event.pairs;
+// ゲーム開始
+initGame();
+gameLoop();
 
-      for (let i = 0; i < pairs.length; i++) {
-        const bodyA = pairs[i].bodyA;
-        const bodyB = pairs[i].bodyB;
-
-        if (bodyA.gameObject && bodyB.gameObject && 
-            bodyA.gameObject.getData('fruitType') === bodyB.gameObject.getData('fruitType')) {
-
-          const fruitType = bodyA.gameObject.getData('fruitType');
-
-          if (fruitType < 8) { // 最大サイズでなければ合体
-            const x = (bodyA.position.x + bodyB.position.x) / 2;
-            const y = (bodyA.position.y + bodyB.position.y) / 2;
-
-            bodyA.gameObject.destroy();
-            bodyB.gameObject.destroy();
-
-            createFruit.call(this, x, y, fruitType + 1);
-
-            score += (fruitType + 1) * 10;
-            scoreText.setText('スコア: ' + score);
-          }
-        }
-
-        // ゲームオーバー判定
-        if ((bodyA.gameObject && bodyA.position.y < config.height * 0.15 && bodyA.velocity.y < 0.1) ||
-            (bodyB.gameObject && bodyB.position.y < config.height * 0.15 && bodyB.velocity.y < 0.1)) {
-          gameOver = true;
-          showGameOver.call(this);
-        }
-      }
-    }, this);
-  }
-
-  function update() {
-    if (gameOver) return;
-
-    // 次のフルーツの位置を更新
-    if (nextFruit) {
-      nextFruit.x = this.input.x;
-    }
-  }
-
-  function prepareNextFruit() {
-    const fruitType = Phaser.Math.Between(1, 3);
-
-    nextFruit = this.add.image(this.input.x, config.height * 0.05, `fruit${fruitType}`);
-    nextFruit.setData('fruitType', fruitType);
-    nextFruit.setAlpha(0.7);
-  }
-
-  function dropFruit(x) {
-    const fruitType = nextFruit.getData('fruitType');
-
-    createFruit.call(this, x, config.height * 0.15, fruitType);
-
-    nextFruit.destroy();
-
-    canDrop = false;
-    setTimeout(() => {
-      canDrop = true;
-      prepareNextFruit.call(this);
-    }, 500);
-  }
-
-  function createFruit(x, y, fruitType) {
-    const fruitSizes = [20, 30, 40, 50, 60, 70, 80, 90];
-
-    const fruit = this.matter.add.image(x, y, `fruit${fruitType}`, null, {
-      circleRadius: fruitSizes[fruitType - 1],
-      restitution: 0.6,
-      friction: 0.005,
-      density: 0.001
-    });
-
-    fruit.setData('fruitType', fruitType);
-    return fruit;
-  }
-
-  function showGameOver() {
-    this.add.image(config.width / 2, config.height / 2, 'game-over')
-      .setDisplaySize(config.width * 0.8, config.height * 0.5);
-
-    this.add.text(config.width / 2, config.height / -50)
-      .setOrigin(0.5)
-      .setStyle({
-        fontSize: '32px',
-        fill: '#fff'
-      })
-      .setText(`最終スコア：${score}`);
-
-    const restartButton = this.add.text(config.width / -100 + config.height)
-      .setOrigin(0.5)
-      .setInteractive()
       .setStyle({
        backgroundColor:"red"
        })
