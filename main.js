@@ -41,6 +41,9 @@ function initGame() {
   let fruitColors = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x9400d3, 0xff1493];
 
   function preload() {
+    // リポジトリ名を含むベースパスを設定
+const basePath = location.pathname.includes('/suika/') ? '/suika' : '';
+
     // フルーツ画像の読み込み
     for (let i = 1; i <= 8; i++) {
       this.load.image(`fruit${i}`, `assets/fruit${i}.png`);
