@@ -1,102 +1,96 @@
-// キャンバスとコンテキストの取得
-const canvas = document.getElementById("game-canvas");
-const ctx = canvas.getContext("2d");
+// main.js
 
-// キャンバスサイズを設定（スマホ対応）
+// キャンバスとコンテキストの取得
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+
+// キャンバスサイズをスマホ画面に合わせる
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// ゲーム用変数
-const fruits = [];
-const fruitImages = [
-    "assets/fruit1.png", "assets/fruit2.png", "assets/fruit3.png",
-    "assets/fruit4.png", "assets/fruit5.png", "assets/fruit6.png",
-    "assets/fruit7.png", "assets/fruit8.png"
-];
-let isGameOver = false;
+// 画像のロード
+const assetsPath = './assets/';
+const backgroundImage = new Image();
+backgroundImage.src = `${assetsPath}background.png`;
 
-// フルーツクラス
+const fruitImages = [];
+for (let i = 1; i <= 8; i++) {
+  const img = new Image();
+  img.src = `${assetsPath}fruit${i}.png`;
+  fruitImages.push(img);
+}
+
+// フルーツオブジェクトの定義
 class Fruit {
-    constructor(x, y, image) {
-        this.x = x;
-        this.y = y;
-        this.image = new Image();
-        this.image.src = image;
-        this.size = 50; // フルーツのサイズ
-        this.speed = Math.random() * 2 + 1; // 落下速度
-    }
+  constructor(x, y, image) {
+    this.x = x;
+    this.y = y;
+    this.image = image;
+    this.size = 50; // フルーツのサイズ
+    this.speedY = Math.random() * 2 + 1; // 落下速度
+  }
 
-    draw() {
-        ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
-    }
+  draw() {
+    ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
+  }
 
-    update() {
-        this.y += this.speed; // フルーツを下に移動
-        if (this.y > canvas.height) {
-            isGameOver = true; // フルーツが画面外に出たらゲームオーバー
-        }
+  update() {
+    this.y += this.speedY;
+    if (this.y > canvas.height) {
+      this.y = -this.size; // 上から再出現
+      this.x = Math.random() * (canvas.width - this.size);
     }
+  }
 }
 
-// フルーツをランダムに生成する関数
-function spawnFruit() {
-    const x = Math.random() * (canvas.width - 50); // ランダムなX座標
-    const y = -50; // 画面上からスタート
-    const image = fruitImages[Math.floor(Math.random() * fruitImages.length)];
-    fruits.push(new Fruit(x, y, image));
-}
-
-// ゲームオーバー画面の表示
-function showGameOver() {
-    const gameOverDiv = document.getElementById("game-over");
-    gameOverDiv.classList.remove("hidden");
-}
-
-// ゲームの初期化
-function initGame() {
-    isGameOver = false;
-    fruits.length = 0;
-
-    // ゲームオーバー画面を非表示にする
-    const gameOverDiv = document.getElementById("game-over");
-    gameOverDiv.classList.add("hidden");
-
-    // フルーツを定期的に生成
-    setInterval(spawnFruit, 1000);
+// フルーツリストを作成
+const fruits = [];
+for (let i = 0; i < 10; i++) {
+  const randomImage =
+    fruitImages[Math.floor(Math.random() * fruitImages.length)];
+  const x = Math.random() * canvas.width;
+  const y = Math.random() * canvas.height - canvas.height;
+  fruits.push(new Fruit(x, y, randomImage));
 }
 
 // ゲームループ
 function gameLoop() {
-    if (isGameOver) {
-        showGameOver();
-        return;
-    }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
+  // 背景描画
+  ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-    // 背景画像の描画（オプション）
-    const backgroundImage = new Image();
-    backgroundImage.src = "assets/background.png";
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  // フルーツ描画と更新
+  fruits.forEach((fruit) => {
+    fruit.update();
+    fruit.draw();
+  });
 
-    // フルーツの描画と更新
-    fruits.forEach((fruit) => {
-        fruit.update();
-        fruit.draw();
-    });
-
-    requestAnimationFrame(gameLoop); // 次のフレームへ
+  requestAnimationFrame(gameLoop);
 }
 
-// 再スタートボタンのイベントリスナー
-document.getElementById("restart-button").addEventListener("click", () => {
-    initGame();
-});
-
 // ゲーム開始
-initGame();
 gameLoop();
 
-      .setStyle({
-       backgroundColor:"red"
-       })
+// タッチイベント処理（フルーツをタップして消す）
+canvas.addEventListener('touchstart', (e) => {
+  const touchX = e.touches[0].clientX;
+  const touchY = e.touches[0].clientY;
+
+  fruits.forEach((fruit, index) => {
+    if (
+      touchX > fruit.x &&
+      touchX < fruit.x + fruit.size &&
+      touchY > fruit.y &&
+      touchY < fruit.y + fruit.size
+    ) {
+      // フルーツを削除して再生成
+      fruits.splice(index, 1);
+      const randomImage =
+        fruitImages[Math.floor(Math.random() * fruitImages.length)];
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height - canvas.height;
+      fruits.push(new Fruit(x, y, randomImage));
+    }
+  });
+});
