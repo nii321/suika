@@ -1,33 +1,59 @@
-/* 全体のリセットとボックスサイズの設定 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* ボディ全体のスタイル */
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f0f0;
-  margin: 0;
-  padding: 0;
-  display: flex; /* フレックスボックスで中央配置 */
-  justify-content: center; /* 水平方向中央揃え */
-  align-items: center; /* 垂直方向中央揃え */
-  height: 100vh; /* ビューポート全体の高さ */
-  overflow: hidden; /* スクロールを防止 */
+/* 全体のリセット */
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* スクロールを防止 */
 }
 
 /* ゲームコンテナ */
 #game-container {
-  width: 100%; /* 必要に応じて固定幅（例：600px）に変更可能 */
-  height: 100%; /* 必要に応じて固定高さ（例：800px）に変更可能 */
-  display: flex; /* フレックスボックスでキャンバスを中央配置 */
-  justify-content: center;
-  align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #f0f8ff; /* 背景色（必要に応じて変更） */
 }
 
-/* ゲームキャンバス */
-canvas {
-  display: block;
+/* キャンバス */
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ゲームオーバー画面 */
+#game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.7); /* 半透明の背景 */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#game-over.hidden {
+    display: none; /* 非表示状態 */
+}
+
+#game-over img {
+    width: 200px; /* ゲームオーバー画像のサイズ */
+    margin-bottom: 20px;
+}
+
+#restart-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #ff6347; /* ボタンの色（トマト色） */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#restart-button:hover {
+    background-color: #ff4500; /* ホバー時の色 */
 }
