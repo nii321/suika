@@ -10,32 +10,63 @@
   <script src="main.js" defer></script>
   <!-- スマホでの縦向き固定を推奨する -->
   <style>
-    body {
+    /* 全体のリセットとボックスサイズの設定 */
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ボディ全体のスタイル */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex; /* フレックスボックスで中央配置 */
+      justify-content: center; /* 水平方向中央揃え */
+      align-items: center; /* 垂直方向中央揃え */
+      height: 100vh; /* ビューポート全体の高さ */
       overflow: hidden;
     }
+
+    /* ゲームコンテナ */
+    #game-container {
+      width: 100%; /* 必要に応じて固定幅（例：600px）に変更可能 */
+      height: 100%; /* 必要に応じて固定高さ（例：800px）に変更可能 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ゲームキャンバス */
+    canvas {
+      display: block;
+    }
+
+    /* 縦向き推奨メッセージのスタイル */
     #orientation-warning {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background-color: rgba(0, 0, 0, 0.8);
       color: white;
-      font-size: 20px;
+      font-size: 24px;
       text-align: center;
       line-height: 100vh;
       z-index: 9999;
     }
+
+    /* 横向き時のみ警告メッセージを表示 */
     @media screen and (orientation: landscape) {
       #orientation-warning {
         display: block;
       }
     }
   </style>
-
 </head>
 <body>
   <!-- ゲームコンテナ -->
