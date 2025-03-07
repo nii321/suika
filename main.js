@@ -8,6 +8,14 @@ const nextFruitImage = document.getElementById("next-fruit-image");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 
+// HTML要素の追加: 次の次のフルーツ表示用
+const nextFruitContainer = document.getElementById("next-fruit");
+const afterNextContainer = document.createElement("div");
+afterNextContainer.className = "next-fruit-preview";
+afterNextContainer.innerHTML = `<h2>次の次:</h2><img id="after-next-fruit-image" src="" alt="次の次のフルーツ">`;
+nextFruitContainer.appendChild(afterNextContainer);
+const afterNextFruitImage = document.getElementById("after-next-fruit-image");
+
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
 const world = engine.world;
@@ -55,12 +63,14 @@ const fruitSizes = [40, 50, 60, 70, 80, 90, 100, 110]; // フルーツごとの�
 
 let score = 0;
 let currentFruitIndex = getRandomFruitIndex();
+let nextFruitIndex = getRandomFruitIndex();
 let activeFruitBody = null;
 let isGameOver = false;
 
 // 次のフルーツ画像を更新
 function updateNextFruit() {
   nextFruitImage.src = fruitImages[currentFruitIndex];
+  afterNextFruitImage.src = fruitImages[nextFruitIndex];
 }
 updateNextFruit();
 
@@ -115,7 +125,8 @@ playArea.addEventListener("touchend", () => {
   Body.setStatic(activeFruitBody, false);
   
   // 次のフルーツを準備
-  currentFruitIndex = getRandomFruitIndex();
+  currentFruitIndex = nextFruitIndex;
+  nextFruitIndex = getRandomFruitIndex();
   updateNextFruit();
   
   // フルーツの参照をリセット
