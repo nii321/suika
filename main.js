@@ -4,7 +4,6 @@ const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 // ゲームの主要な設定
 const playArea = document.getElementById("play-area");
 const scoreElement = document.getElementById("score");
-const nextFruitImage = document.getElementById("next-fruit-image");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 
@@ -24,7 +23,7 @@ const render = Render.create({
     width: playAreaWidth,
     height: playAreaHeight,
     wireframes: false, // 実際の画像を表示するためワイヤーフレームを無効化
-    background: 'transparent',
+    background: '#f0f0f0', // 背景色を設定（猫の画像ではなく単色に）
     pixelRatio: window.devicePixelRatio // デバイスのピクセル比に合わせる
   },
 });
@@ -77,7 +76,6 @@ const nextFruitImagePreview = document.getElementById("next-fruit-image-preview"
 
 // 次のフルーツ画像を更新
 function updateNextFruit() {
-  nextFruitImage.src = fruitImages[currentFruitIndex];
   nextFruitImagePreview.src = fruitImages[currentFruitIndex];
   afterNextFruitImage.src = fruitImages[nextFruitIndex];
 }
