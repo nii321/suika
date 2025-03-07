@@ -8,21 +8,6 @@ const nextFruitImage = document.getElementById("next-fruit-image");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 
-// 次の次のフルーツ表示用の要素を追加
-const nextFruitsContainer = document.createElement("div");
-nextFruitsContainer.id = "next-fruits-container";
-nextFruitsContainer.innerHTML = `
-  <div id="after-next-fruit">
-    <img id="after-next-fruit-image" src="" alt="次の次のフルーツ">
-  </div>
-  <div id="current-next-fruit">
-    <img id="next-fruit-image-preview" src="" alt="次のフルーツ">
-  </div>
-`;
-playArea.appendChild(nextFruitsContainer);
-const afterNextFruitImage = document.getElementById("after-next-fruit-image");
-const nextFruitImagePreview = document.getElementById("next-fruit-image-preview");
-
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
 const world = engine.world;
@@ -40,6 +25,7 @@ const render = Render.create({
     height: playAreaHeight,
     wireframes: false, // 実際の画像を表示するためワイヤーフレームを無効化
     background: 'transparent',
+    pixelRatio: window.devicePixelRatio // デバイスのピクセル比に合わせる
   },
 });
 
@@ -74,6 +60,21 @@ let nextFruitIndex = getRandomFruitIndex();
 let activeFruitBody = null;
 let isGameOver = false;
 
+// 次のフルーツ表示用の要素を追加
+const nextFruitsContainer = document.createElement("div");
+nextFruitsContainer.id = "next-fruits-container";
+nextFruitsContainer.innerHTML = `
+  <div id="after-next-fruit">
+    <img id="after-next-fruit-image" src="" alt="次の次のフルーツ">
+  </div>
+  <div id="current-next-fruit">
+    <img id="next-fruit-image-preview" src="" alt="次のフルーツ">
+  </div>
+`;
+playArea.appendChild(nextFruitsContainer);
+const afterNextFruitImage = document.getElementById("after-next-fruit-image");
+const nextFruitImagePreview = document.getElementById("next-fruit-image-preview");
+
 // 次のフルーツ画像を更新
 function updateNextFruit() {
   nextFruitImage.src = fruitImages[currentFruitIndex];
@@ -92,7 +93,9 @@ playArea.addEventListener("touchstart", (event) => {
   if (isGameOver || activeFruitBody) return;
 
   const touch = event.touches[0];
-  const xPosition = touch.pageX;
+  // タッチ位置をプレイエリア内の座標に変換
+  const rect = playArea.getBoundingClientRect();
+  const xPosition = touch.clientX - rect.left;
   
   // フルーツの物体を作成（上部に固定）
   activeFruitBody = Bodies.circle(xPosition, 50, fruitSizes[currentFruitIndex] / 2, {
@@ -117,10 +120,12 @@ playArea.addEventListener("touchmove", (event) => {
   if (!activeFruitBody || isGameOver) return;
 
   const touch = event.touches[0];
+  const rect = playArea.getBoundingClientRect();
+  const xPosition = touch.clientX - rect.left;
   
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
-    x: touch.pageX, 
+    x: xPosition, 
     y: 50 // 上部に固定
   });
 });
@@ -208,5 +213,3 @@ setInterval(checkGameOver, 1000);
 restartButton.addEventListener("click", () => {
   location.reload(); // ページをリロードしてゲームを再スタート 
 });
-
-
