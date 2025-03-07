@@ -7,6 +7,7 @@ body, html {
   background-color: #f0f8ff; /* 背景色 */
   overflow: hidden; /* スクロールバーを非表示 */
 }
+
 /* 背景コンテナ */
 .background-container {
   position: absolute;
@@ -57,15 +58,23 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 10px;
+  margin: 10px auto;
+  width: 100%;
 }
 
-#next-fruit h2 {
+.fruit-preview {
+  display: flex;
+  align-items: center;
+  margin: 0 15px;
+}
+
+.fruit-preview h2 {
   margin-right: 10px;
+  font-size: 18px;
 }
 
-#next-fruit img {
-  width: 50px;
+.fruit-preview img {
+  width: 40px;
   height: auto;
 }
 
@@ -113,6 +122,7 @@ canvas {
 }
 
 #restart-button:hover {
-   cursor:pointer ;
-   background-color:#ff6633 ;
+   cursor: pointer;
+   background-color: #ff6633;
 }
+
