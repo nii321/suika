@@ -24,6 +24,7 @@ const render = Render.create({
     width: playAreaWidth,
     height: playAreaHeight,
     wireframes: false, // 実際の画像を表示するためワイヤーフレームを無効化
+    background: 'transparent',
   },
 });
 
@@ -65,19 +66,18 @@ updateNextFruit();
 
 // ランダムなフルーツインデックスを取得する関数
 function getRandomFruitIndex() {
-  return Math.floor(Math.random() * fruitImages.length);
+  return Math.floor(Math.random() * 4); // 初期は小さいフルーツのみ生成
 }
 
 // タッチ操作でフルーツを生成し、指に追従させる
 playArea.addEventListener("touchstart", (event) => {
-  if (isGameOver) return;
+  if (isGameOver || activeFruitBody) return;
 
   const touch = event.touches[0];
-  
   const xPosition = touch.pageX;
   
-  // フルーツの物体を作成
-  activeFruitBody = Bodies.circle(xPosition, fruitSizes[currentFruitIndex] / 2, fruitSizes[currentFruitIndex] / 2, {
+  // フルーツの物体を作成（上部に固定）
+  activeFruitBody = Bodies.circle(xPosition, 50, fruitSizes[currentFruitIndex] / 2, {
     render: {
       sprite: {
         texture: fruitImages[currentFruitIndex],
@@ -88,28 +88,38 @@ playArea.addEventListener("touchstart", (event) => {
     restitution: 0.8,
     friction: 0.5,
     density: 0.01,
+    isStatic: true, // 静的にして重力の影響を受けないようにする
   });
   
   World.add(world, activeFruitBody);
 });
 
-// 指が動いたときにフルーツが追従する
+// 指が動いたときにフルーツが左右のみ追従する
 playArea.addEventListener("touchmove", (event) => {
   if (!activeFruitBody || isGameOver) return;
 
   const touch = event.touches[0];
   
-  Body.setPosition(activeFruitBody, { x: touch.pageX, y: activeFruitBody.position.y });
+  // y座標は固定したまま、x座標のみ更新
+  Body.setPosition(activeFruitBody, { 
+    x: touch.pageX, 
+    y: 50 // 上部に固定
+  });
 });
 
-// 指を離したときにフルーツが落下する（重力に任せる）
+// 指を離したときにフルーツが落下する
 playArea.addEventListener("touchend", () => {
   if (!activeFruitBody || isGameOver) return;
 
-  activeFruitBody = null; // フルーツの操作を解除
-
-  currentFruitIndex = getRandomFruitIndex(); // 次のフルーツを準備
+  // 静的状態を解除して重力の影響を受けるようにする
+  Body.setStatic(activeFruitBody, false);
+  
+  // 次のフルーツを準備
+  currentFruitIndex = getRandomFruitIndex();
   updateNextFruit();
+  
+  // フルーツの参照をリセット
+  activeFruitBody = null;
 });
 
 // 合体ロジック（同じ種類のフルーツが接触した場合）
@@ -120,9 +130,17 @@ Events.on(engine, "collisionStart", (event) => {
     const bodyA = pair.bodyA;
     const bodyB = pair.bodyB;
 
-    if (bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
+    // 壁との衝突は無視
+    if (bodyA.isStatic && bodyA !== activeFruitBody) return;
+    if (bodyB.isStatic && bodyB !== activeFruitBody) return;
+
+    if (bodyA.render.sprite && bodyB.render.sprite && 
+        bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
       // 合体処理：次の段階のフルーツに進化させる
-      const nextIndex = Math.min(fruitImages.indexOf(bodyA.render.sprite.texture) + 1, fruitImages.length - 1);
+      const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
+      if (fruitIndex < 0) return;
+      
+      const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
       const newSize = fruitSizes[nextIndex];
 
       const mergedBody = Bodies.circle(
@@ -147,26 +165,28 @@ Events.on(engine, "collisionStart", (event) => {
       World.remove(world, bodyA);
       World.remove(world, bodyB);
 
-      score += nextIndex * 10; // スコア加算（大きなフルーツほど高得点）
+      score += (nextIndex + 1) * 10; // スコア加算（大きなフルーツほど高得点）
       scoreElement.textContent = score;
     }
+  });
 });
-});
-// 定期的にゲームオーバー判定を行う
-setInterval(checkGameOver, 1000);
 
 // ゲームオーバー判定
 function checkGameOver() {
   world.bodies.forEach((body) => {
-    if (body.position.y < -50 && !body.isStatic) { // プレイエリア外に出た場合
+    // 静的でないボディ（フルーツ）が上部を超えた場合
+    if (!body.isStatic && body.position.y < 50 && body.position.y > 0) {
       isGameOver = true;
       gameOverScreen.classList.remove("hidden");
     }
-});
+  });
 }
+
+// 定期的にゲームオーバー判定を行う
+setInterval(checkGameOver, 1000);
 
 // リスタートボタンのクリックイベント
 restartButton.addEventListener("click", () => {
- location.reload(); // ページをリロードしてゲームを再スタート 
+  location.reload(); // ページをリロードしてゲームを再スタート 
 });
 
