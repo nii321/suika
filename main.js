@@ -8,13 +8,20 @@ const nextFruitImage = document.getElementById("next-fruit-image");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 
-// HTML要素の追加: 次の次のフルーツ表示用
-const nextFruitContainer = document.getElementById("next-fruit");
-const afterNextContainer = document.createElement("div");
-afterNextContainer.className = "next-fruit-preview";
-afterNextContainer.innerHTML = `<h2>次の次:</h2><img id="after-next-fruit-image" src="" alt="次の次のフルーツ">`;
-nextFruitContainer.appendChild(afterNextContainer);
+// 次の次のフルーツ表示用の要素を追加
+const nextFruitsContainer = document.createElement("div");
+nextFruitsContainer.id = "next-fruits-container";
+nextFruitsContainer.innerHTML = `
+  <div id="after-next-fruit">
+    <img id="after-next-fruit-image" src="" alt="次の次のフルーツ">
+  </div>
+  <div id="current-next-fruit">
+    <img id="next-fruit-image-preview" src="" alt="次のフルーツ">
+  </div>
+`;
+playArea.appendChild(nextFruitsContainer);
 const afterNextFruitImage = document.getElementById("after-next-fruit-image");
+const nextFruitImagePreview = document.getElementById("next-fruit-image-preview");
 
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
@@ -70,6 +77,7 @@ let isGameOver = false;
 // 次のフルーツ画像を更新
 function updateNextFruit() {
   nextFruitImage.src = fruitImages[currentFruitIndex];
+  nextFruitImagePreview.src = fruitImages[currentFruitIndex];
   afterNextFruitImage.src = fruitImages[nextFruitIndex];
 }
 updateNextFruit();
@@ -200,4 +208,5 @@ setInterval(checkGameOver, 1000);
 restartButton.addEventListener("click", () => {
   location.reload(); // ページをリロードしてゲームを再スタート 
 });
+
 
