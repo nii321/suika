@@ -152,6 +152,8 @@ Events.on(engine, "collisionStart", (event) => {
     }
 });
 });
+// 定期的にゲームオーバー判定を行う
+setInterval(checkGameOver, 1000);
 
 // ゲームオーバー判定
 function checkGameOver() {
