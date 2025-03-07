@@ -15,17 +15,20 @@
       <h1>スコア: <span id="score">0</span></h1>
     </div>
 
-    <!-- 次のフルーツ表示 -->
-    <div id="next-fruit">
-      <h2>次のフルーツ:</h2>
-      <img id="next-fruit-image" src="" alt="次のフルーツ">
-    </div>
-
     <!-- プレイエリア -->
     <div id="play-area">
       <!-- 背景画像 -->
-       <div class="background-container">
       <img src="assets/background.png" alt="背景" class="background">
+      
+      <!-- 次のフルーツ表示（プレイエリア内に配置） -->
+      <div id="next-fruits-container">
+        <div id="after-next-fruit">
+          <img id="after-next-fruit-image" src="" alt="次の次のフルーツ">
+        </div>
+        <div id="current-next-fruit">
+          <img id="next-fruit-image" src="" alt="次のフルーツ">
+        </div>
+      </div>
     </div>
 
     <!-- ゲームオーバー表示 -->
@@ -39,6 +42,5 @@
   <script src="main.js"></script>
 </body>
 </html>
-
 
 
