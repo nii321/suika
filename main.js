@@ -1,5 +1,5 @@
 // Matter.js のモジュールを初期化
-const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
+const { Engine, Render, Runner, World, Bodies, Body, Events, Composite } = Matter;
 
 // ゲームの主要な設定
 const playArea = document.getElementById("play-area");
@@ -245,12 +245,16 @@ restartButton.addEventListener("click", () => {
 
 // ゲームリセット関数
 function resetGame() {
-  // すべてのフルーツを削除
-  world.bodies.forEach(body => {
-    if (!body.isStatic || body === activeFruitBody) {
-      World.remove(world, body);
-    }
-  });
+  // すべてのフルーツを削除（Composite.clearを使用）
+  Composite.clear(world, false, true);
+  
+  // 壁を再追加（上辺なし）
+  const walls = [
+    Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
+    Bodies.rectangle(0, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 左側
+    Bodies.rectangle(playAreaWidth, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 右側
+  ];
+  World.add(world, walls);
   
   // スコアリセット
   score = 0;
