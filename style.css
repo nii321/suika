@@ -37,11 +37,30 @@ body, html {
   width: calc(100% - 20px);
   height: calc(100% - 150px);
   background-color: #ffffff; /* 白色背景 */
-  border-left: solid 2px #000; /* 左側の枠線 */
-  border-right: solid 2px #000; /* 右側の枠線 */
+  border-left: none; /* 左側の枠線を一旦削除 */
+  border-right: none; /* 右側の枠線を一旦削除 */
   border-bottom: solid 2px #000; /* 下側の枠線 */
   border-top: none; /* 上辺の枠線を削除 */
   overflow: hidden;
+}
+
+/* 左右の枠線用の疑似要素 */
+#play-area::before,
+#play-area::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  background-color: #000;
+  bottom: 0;
+  top: 50px; /* フルーツ作成位置(20px)より下から開始 */
+}
+
+#play-area::before {
+  left: 0;
+}
+
+#play-area::after {
+  right: 0;
 }
 
 /* Matter.js のキャンバス */
