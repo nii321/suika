@@ -33,7 +33,7 @@ Runner.run(Runner.create(), engine);
 
 // 壁（プレイエリアの枠）を作成
 const walls = [
-  Bodies.rectangle(playAreaWidth / 2, 0, playAreaWidth, 10, { isStatic: true }), // 上部
+  
   Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
   Bodies.rectangle(0, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 左側
   Bodies.rectangle(playAreaWidth, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 右側
@@ -96,7 +96,7 @@ playArea.addEventListener("touchstart", (event) => {
   const xPosition = touch.clientX - rect.left;
   
   // フルーツの物体を作成（上部に固定）
-  activeFruitBody = Bodies.circle(xPosition, 50, fruitSizes[currentFruitIndex] / 2, {
+  activeFruitBody = Bodies.circle(xPosition, 20, fruitSizes[currentFruitIndex] / 2, {
     render: {
       sprite: {
         texture: fruitImages[currentFruitIndex],
@@ -124,7 +124,7 @@ playArea.addEventListener("touchmove", (event) => {
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
     x: xPosition, 
-    y: 50 // 上部に固定
+    y: 20 // 上部に固定
   });
 });
 
@@ -197,7 +197,7 @@ Events.on(engine, "collisionStart", (event) => {
 function checkGameOver() {
   world.bodies.forEach((body) => {
     // 静的でないボディ（フルーツ）が上部を超えた場合
-    if (!body.isStatic && body.position.y < 50 && body.position.y > 0) {
+    if (!body.isStatic && body.position.y < 30 && body.position.y > 0) {
       isGameOver = true;
       gameOverScreen.classList.remove("hidden");
     }
