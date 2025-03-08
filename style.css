@@ -52,7 +52,7 @@ body, html {
   width: 2px;
   background-color: #000;
   bottom: 0;
-  top: 50px; /* フルーツ作成位置(20px)より下から開始 */
+  top: 100px; /* フルーツ作成位置より下から開始 */
 }
 
 #play-area::before {
@@ -72,6 +72,18 @@ canvas {
 /* フルーツ */
 .fruit {
   position: absolute;
+}
+
+/* キャラクター */
+#character {
+  position: absolute;
+  z-index: 2;
+  transition: left 0.1s ease;
+}
+
+#character img {
+  width: 50px;
+  height: auto;
 }
 
 /* ゲームオーバー画面 */
@@ -108,30 +120,4 @@ canvas {
 #restart-button:hover {
    cursor: pointer;
    background-color: #ff6633;
-}
-
-/* プレイエリア内のフルーツ表示 */
-#next-fruits-container {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-}
-
-#after-next-fruit {
-  margin-bottom: 5px;
-}
-
-#after-next-fruit img {
-  width: 30px;
-  height: 30px;
-}
-
-#current-next-fruit img {
-  width: 40px;
-  height: 40px;
 }
