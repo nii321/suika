@@ -197,7 +197,7 @@ Events.on(engine, "collisionStart", (event) => {
 function checkGameOver() {
   world.bodies.forEach((body) => {
     // 静的でないボディ（フルーツ）が上部を超えた場合
-    if (!body.isStatic && body.position.y < 30 && body.position.y > 0) {
+    if (!body.isStatic && body.position.y < 50 && body.position.y > 0) {
       isGameOver = true;
       gameOverScreen.classList.remove("hidden");
     }
