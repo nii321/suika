@@ -7,6 +7,9 @@ const scoreElement = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 
+// 次のフルーツ表示要素
+const nextFruitImage = document.getElementById("next-fruit-image");
+
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
 const world = engine.world;
@@ -55,8 +58,10 @@ const fruitSizes = [70, 90, 130, 140, 160, 180, 200, 230]; // フルーツごと
 
 let score = 0;
 let currentFruitIndex = getRandomFruitIndex();
+let nextFruitIndex = getRandomFruitIndex();
 let activeFruitBody = null;
 let isGameOver = false;
+let characterPosition = { x: playAreaWidth / 2, y: 30 };
 
 // キャラクターの追加
 const characterElement = document.createElement("div");
@@ -64,8 +69,14 @@ characterElement.id = "character";
 characterElement.innerHTML = `<img src="assets/character.png" alt="キャラクター">`;
 playArea.appendChild(characterElement);
 
+// 次のフルーツ画像を更新
+function updateNextFruitPreview() {
+  nextFruitImage.src = fruitImages[nextFruitIndex];
+}
+
 // 初期フルーツを作成
 createNewFruit(playAreaWidth / 2);
+updateNextFruitPreview();
 
 // ランダムなフルーツインデックスを取得する関数
 function getRandomFruitIndex() {
@@ -74,8 +85,11 @@ function getRandomFruitIndex() {
 
 // 新しいフルーツを作成する関数
 function createNewFruit(xPosition) {
-  // フルーツの物体を作成（作成位置を30pxに変更）
-  activeFruitBody = Bodies.circle(xPosition, 30, fruitSizes[currentFruitIndex] / 2, {
+  // キャラクターの位置を保存
+  characterPosition.x = xPosition;
+  
+  // フルーツの物体を作成（キャラクターの少し左に配置）
+  activeFruitBody = Bodies.circle(xPosition - 20, 30, fruitSizes[currentFruitIndex] / 2, {
     render: {
       sprite: {
         texture: fruitImages[currentFruitIndex],
@@ -91,18 +105,18 @@ function createNewFruit(xPosition) {
   
   World.add(world, activeFruitBody);
   
-  // キャラクターの位置も更新
+  // キャラクターの位置を更新
   updateCharacterPosition(xPosition);
 }
 
 // キャラクターの位置を更新する関数
 function updateCharacterPosition(xPosition) {
-  // キャラクターをフルーツの少し右に配置
-  characterElement.style.left = (xPosition + 30) + 'px';
+  characterPosition.x = xPosition;
+  characterElement.style.left = xPosition + 'px';
   characterElement.style.top = '30px'; // フルーツと同じ高さ
 }
 
-// タッチ操作でフルーツを移動
+// タッチ操作でフルーツとキャラクターを移動
 playArea.addEventListener("touchstart", (event) => {
   if (isGameOver) return;
 
@@ -114,8 +128,8 @@ playArea.addEventListener("touchstart", (event) => {
   // フルーツとキャラクターの位置を更新
   if (activeFruitBody) {
     Body.setPosition(activeFruitBody, { 
-      x: xPosition, 
-      y: 30 // 作成位置を30pxに変更
+      x: xPosition - 20, // キャラクターの少し左
+      y: 30
     });
     updateCharacterPosition(xPosition);
   }
@@ -131,8 +145,8 @@ playArea.addEventListener("touchmove", (event) => {
   
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
-    x: xPosition, 
-    y: 30 // 作成位置を30pxに変更
+    x: xPosition - 20, // キャラクターの少し左
+    y: 30
   });
   
   // キャラクターの位置も更新
@@ -147,16 +161,14 @@ playArea.addEventListener("touchend", () => {
   Body.setStatic(activeFruitBody, false);
   
   // 次のフルーツを準備
-  currentFruitIndex = getRandomFruitIndex();
+  currentFruitIndex = nextFruitIndex;
+  nextFruitIndex = getRandomFruitIndex();
+  updateNextFruitPreview();
   
-  // キャラクターを一時的に非表示
-  characterElement.style.display = 'none';
-  
-  // 少し待ってから新しいフルーツを作成
+  // 少し待ってから新しいフルーツを作成（キャラクターはそのまま）
   setTimeout(() => {
     if (!isGameOver) {
-      createNewFruit(playAreaWidth / 2);
-      characterElement.style.display = 'block';
+      createNewFruit(characterPosition.x);
     }
   }, 500);
   
@@ -251,9 +263,6 @@ function triggerGameOver() {
     activeFruitBody = null;
   }
   
-  // キャラクターを非表示
-  characterElement.style.display = 'none';
-  
   console.log("ゲームオーバー！");
 }
 
@@ -285,6 +294,12 @@ function resetGame() {
   
   // フルーツリセット
   currentFruitIndex = getRandomFruitIndex();
+  nextFruitIndex = getRandomFruitIndex();
+  updateNextFruitPreview();
+  
+  // キャラクターの位置をリセット
+  characterPosition = { x: playAreaWidth / 2, y: 30 };
+  updateCharacterPosition(characterPosition.x);
   
   // 状態リセット
   activeFruitBody = null;
@@ -293,9 +308,6 @@ function resetGame() {
   // ゲームオーバー画面を非表示
   gameOverScreen.classList.add("hidden");
   
-  // キャラクターを表示
-  characterElement.style.display = 'block';
-  
   // 新しいフルーツを作成
-  createNewFruit(playAreaWidth / 2);
+  createNewFruit(characterPosition.x);
 }
