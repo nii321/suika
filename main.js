@@ -31,9 +31,9 @@ const render = Render.create({
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-// 壁（プレイエリアの枠）を作成
+// 壁（プレイエリアの枠）を作成 - 上辺を削除
 const walls = [
-  
+  // 上部の壁を削除
   Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
   Bodies.rectangle(0, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 左側
   Bodies.rectangle(playAreaWidth, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 右側
@@ -95,7 +95,7 @@ playArea.addEventListener("touchstart", (event) => {
   const rect = playArea.getBoundingClientRect();
   const xPosition = touch.clientX - rect.left;
   
-  // フルーツの物体を作成（上部に固定）
+  // フルーツの物体を作成（上部より上に配置）
   activeFruitBody = Bodies.circle(xPosition, 20, fruitSizes[currentFruitIndex] / 2, {
     render: {
       sprite: {
@@ -124,7 +124,7 @@ playArea.addEventListener("touchmove", (event) => {
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
     x: xPosition, 
-    y: 20 // 上部に固定
+    y: 20 // 上部より上に固定
   });
 });
 
@@ -195,19 +195,76 @@ Events.on(engine, "collisionStart", (event) => {
 
 // ゲームオーバー判定
 function checkGameOver() {
+  // すでにゲームオーバーなら処理しない
+  if (isGameOver) return;
+  
   world.bodies.forEach((body) => {
     // 静的でないボディ（フルーツ）が上部を超えた場合
-    if (!body.isStatic && body.position.y < 50 && body.position.y > 0) {
-      isGameOver = true;
-      gameOverScreen.classList.remove("hidden");
+    if (!body.isStatic && body.position.y < 30 && body.position.y > 0) {
+      // フルーツが一定時間上部にとどまっているか確認
+      if (!body.gameOverTimer) {
+        body.gameOverTimer = 1;
+      } else {
+        body.gameOverTimer++;
+        // 一定時間（例：30フレーム）上部にとどまったらゲームオーバー
+        if (body.gameOverTimer > 30) {
+          triggerGameOver();
+        }
+      }
+    } else if (body.gameOverTimer) {
+      // 上部から離れたらタイマーをリセット
+      body.gameOverTimer = 0;
     }
   });
 }
 
-// 定期的にゲームオーバー判定を行う
-setInterval(checkGameOver, 1000);
+// ゲームオーバー処理を関数化
+function triggerGameOver() {
+  isGameOver = true;
+  
+  // ゲームオーバー画面を表示
+  gameOverScreen.classList.remove("hidden");
+  
+  // アクティブなフルーツがあれば削除
+  if (activeFruitBody) {
+    World.remove(world, activeFruitBody);
+    activeFruitBody = null;
+  }
+  
+  console.log("ゲームオーバー！");
+}
+
+// 定期的にゲームオーバー判定を行う（フレームごとに判定）
+Events.on(engine, "afterUpdate", checkGameOver);
 
 // リスタートボタンのクリックイベント
 restartButton.addEventListener("click", () => {
-  location.reload(); // ページをリロードしてゲームを再スタート 
+  // ゲームをリセット
+  resetGame();
 });
+
+// ゲームリセット関数
+function resetGame() {
+  // すべてのフルーツを削除
+  world.bodies.forEach(body => {
+    if (!body.isStatic || body === activeFruitBody) {
+      World.remove(world, body);
+    }
+  });
+  
+  // スコアリセット
+  score = 0;
+  scoreElement.textContent = score;
+  
+  // フルーツリセット
+  currentFruitIndex = getRandomFruitIndex();
+  nextFruitIndex = getRandomFruitIndex();
+  updateNextFruit();
+  
+  // 状態リセット
+  activeFruitBody = null;
+  isGameOver = false;
+  
+  // ゲームオーバー画面を非表示
+  gameOverScreen.classList.add("hidden");
+}
