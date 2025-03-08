@@ -35,8 +35,8 @@ Runner.run(Runner.create(), engine);
 const walls = [
   // 上部の壁を削除
   Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
-  Bodies.rectangle(0, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 左側（上部50pxは除外）
-  Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 右側（上部50pxは除外）
+  Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
+  Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
 ];
 World.add(world, walls);
 
@@ -55,48 +55,27 @@ const fruitSizes = [70, 90, 130, 140, 160, 180, 200, 230]; // フルーツごと
 
 let score = 0;
 let currentFruitIndex = getRandomFruitIndex();
-let nextFruitIndex = getRandomFruitIndex();
 let activeFruitBody = null;
 let isGameOver = false;
 
-// 次のフルーツ表示用の要素を追加
-const nextFruitsContainer = document.createElement("div");
-nextFruitsContainer.id = "next-fruits-container";
-nextFruitsContainer.innerHTML = `
-  <div id="after-next-fruit">
-    <img id="after-next-fruit-image" src="" alt="次の次のフルーツ">
-  </div>
-  <div id="current-next-fruit">
-    <img id="next-fruit-image-preview" src="" alt="次のフルーツ">
-  </div>
-`;
-playArea.appendChild(nextFruitsContainer);
-const afterNextFruitImage = document.getElementById("after-next-fruit-image");
-const nextFruitImagePreview = document.getElementById("next-fruit-image-preview");
+// キャラクターの追加
+const characterElement = document.createElement("div");
+characterElement.id = "character";
+characterElement.innerHTML = `<img src="assets/character.png" alt="キャラクター">`;
+playArea.appendChild(characterElement);
 
-// 次のフルーツ画像を更新
-function updateNextFruit() {
-  nextFruitImagePreview.src = fruitImages[currentFruitIndex];
-  afterNextFruitImage.src = fruitImages[nextFruitIndex];
-}
-updateNextFruit();
+// 初期フルーツを作成
+createNewFruit(playAreaWidth / 2);
 
 // ランダムなフルーツインデックスを取得する関数
 function getRandomFruitIndex() {
   return Math.floor(Math.random() * 4); // 初期は小さいフルーツのみ生成
 }
 
-// タッチ操作でフルーツを生成し、指に追従させる
-playArea.addEventListener("touchstart", (event) => {
-  if (isGameOver || activeFruitBody) return;
-
-  const touch = event.touches[0];
-  // タッチ位置をプレイエリア内の座標に変換
-  const rect = playArea.getBoundingClientRect();
-  const xPosition = touch.clientX - rect.left;
-  
-  // フルーツの物体を作成（上部より上に配置）
-  activeFruitBody = Bodies.circle(xPosition, 20, fruitSizes[currentFruitIndex] / 2, {
+// 新しいフルーツを作成する関数
+function createNewFruit(xPosition) {
+  // フルーツの物体を作成（作成位置を30pxに変更）
+  activeFruitBody = Bodies.circle(xPosition, 30, fruitSizes[currentFruitIndex] / 2, {
     render: {
       sprite: {
         texture: fruitImages[currentFruitIndex],
@@ -111,9 +90,38 @@ playArea.addEventListener("touchstart", (event) => {
   });
   
   World.add(world, activeFruitBody);
+  
+  // キャラクターの位置も更新
+  updateCharacterPosition(xPosition);
+}
+
+// キャラクターの位置を更新する関数
+function updateCharacterPosition(xPosition) {
+  // キャラクターをフルーツの少し右に配置
+  characterElement.style.left = (xPosition + 30) + 'px';
+  characterElement.style.top = '30px'; // フルーツと同じ高さ
+}
+
+// タッチ操作でフルーツを移動
+playArea.addEventListener("touchstart", (event) => {
+  if (isGameOver) return;
+
+  const touch = event.touches[0];
+  // タッチ位置をプレイエリア内の座標に変換
+  const rect = playArea.getBoundingClientRect();
+  const xPosition = touch.clientX - rect.left;
+  
+  // フルーツとキャラクターの位置を更新
+  if (activeFruitBody) {
+    Body.setPosition(activeFruitBody, { 
+      x: xPosition, 
+      y: 30 // 作成位置を30pxに変更
+    });
+    updateCharacterPosition(xPosition);
+  }
 });
 
-// 指が動いたときにフルーツが左右のみ追従する
+// 指が動いたときにフルーツとキャラクターが左右のみ追従する
 playArea.addEventListener("touchmove", (event) => {
   if (!activeFruitBody || isGameOver) return;
 
@@ -124,8 +132,11 @@ playArea.addEventListener("touchmove", (event) => {
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
     x: xPosition, 
-    y: 20 // 上部より上に固定
+    y: 30 // 作成位置を30pxに変更
   });
+  
+  // キャラクターの位置も更新
+  updateCharacterPosition(xPosition);
 });
 
 // 指を離したときにフルーツが落下する
@@ -136,9 +147,18 @@ playArea.addEventListener("touchend", () => {
   Body.setStatic(activeFruitBody, false);
   
   // 次のフルーツを準備
-  currentFruitIndex = nextFruitIndex;
-  nextFruitIndex = getRandomFruitIndex();
-  updateNextFruit();
+  currentFruitIndex = getRandomFruitIndex();
+  
+  // キャラクターを一時的に非表示
+  characterElement.style.display = 'none';
+  
+  // 少し待ってから新しいフルーツを作成
+  setTimeout(() => {
+    if (!isGameOver) {
+      createNewFruit(playAreaWidth / 2);
+      characterElement.style.display = 'block';
+    }
+  }, 500);
   
   // フルーツの参照をリセット
   activeFruitBody = null;
@@ -200,7 +220,7 @@ function checkGameOver() {
   
   world.bodies.forEach((body) => {
     // 静的でないボディ（フルーツ）が左右の枠線の開始位置より上で一定時間とどまった場合
-    if (!body.isStatic && body.position.y < 50 && body.position.y > 0) {
+    if (!body.isStatic && body.position.y < 100 && body.position.y > 0) {
       // フルーツが一定時間上部にとどまっているか確認
       if (!body.gameOverTimer) {
         body.gameOverTimer = 1;
@@ -231,6 +251,9 @@ function triggerGameOver() {
     activeFruitBody = null;
   }
   
+  // キャラクターを非表示
+  characterElement.style.display = 'none';
+  
   console.log("ゲームオーバー！");
 }
 
@@ -251,8 +274,8 @@ function resetGame() {
   // 壁を再追加（上辺なし、左右は途中から）
   const walls = [
     Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
-    Bodies.rectangle(0, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 左側（上部50pxは除外）
-    Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 右側（上部50pxは除外）
+    Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
+    Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
   ];
   World.add(world, walls);
   
@@ -262,8 +285,6 @@ function resetGame() {
   
   // フルーツリセット
   currentFruitIndex = getRandomFruitIndex();
-  nextFruitIndex = getRandomFruitIndex();
-  updateNextFruit();
   
   // 状態リセット
   activeFruitBody = null;
@@ -271,4 +292,10 @@ function resetGame() {
   
   // ゲームオーバー画面を非表示
   gameOverScreen.classList.add("hidden");
+  
+  // キャラクターを表示
+  characterElement.style.display = 'block';
+  
+  // 新しいフルーツを作成
+  createNewFruit(playAreaWidth / 2);
 }
