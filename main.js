@@ -31,12 +31,12 @@ const render = Render.create({
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-// 壁（プレイエリアの枠）を作成 - 上辺を削除
+// 壁（プレイエリアの枠）を作成 - 上辺を削除、左右は途中から
 const walls = [
   // 上部の壁を削除
   Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
-  Bodies.rectangle(0, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 左側
-  Bodies.rectangle(playAreaWidth, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 右側
+  Bodies.rectangle(0, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 左側（上部50pxは除外）
+  Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 右側（上部50pxは除外）
 ];
 World.add(world, walls);
 
@@ -199,8 +199,8 @@ function checkGameOver() {
   if (isGameOver) return;
   
   world.bodies.forEach((body) => {
-    // 静的でないボディ（フルーツ）が上部を超えた場合
-    if (!body.isStatic && body.position.y < 30 && body.position.y > 0) {
+    // 静的でないボディ（フルーツ）が左右の枠線の開始位置より上で一定時間とどまった場合
+    if (!body.isStatic && body.position.y < 50 && body.position.y > 0) {
       // フルーツが一定時間上部にとどまっているか確認
       if (!body.gameOverTimer) {
         body.gameOverTimer = 1;
@@ -248,11 +248,11 @@ function resetGame() {
   // すべてのフルーツを削除（Composite.clearを使用）
   Composite.clear(world, false, true);
   
-  // 壁を再追加（上辺なし）
+  // 壁を再追加（上辺なし、左右は途中から）
   const walls = [
     Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
-    Bodies.rectangle(0, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 左側
-    Bodies.rectangle(playAreaWidth, playAreaHeight / 2, 10, playAreaHeight, { isStatic: true }), // 右側
+    Bodies.rectangle(0, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 左側（上部50pxは除外）
+    Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 50, 10, playAreaHeight - 50, { isStatic: true }), // 右側（上部50pxは除外）
   ];
   World.add(world, walls);
   
