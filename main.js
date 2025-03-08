@@ -160,15 +160,16 @@ playArea.addEventListener("touchend", () => {
   // 静的状態を解除して重力の影響を受けるようにする
   Body.setStatic(activeFruitBody, false);
   
-  // 次のフルーツを準備
+  // 次のフルーツを準備（ここでは画像更新しない）
   currentFruitIndex = nextFruitIndex;
   nextFruitIndex = getRandomFruitIndex();
-  updateNextFruitPreview();
   
   // 少し待ってから新しいフルーツを作成（キャラクターはそのまま）
   setTimeout(() => {
     if (!isGameOver) {
       createNewFruit(characterPosition.x);
+      // フルーツが作成された時に次のフルーツ画像を更新
+      updateNextFruitPreview();
     }
   }, 500);
   
@@ -295,7 +296,6 @@ function resetGame() {
   // フルーツリセット
   currentFruitIndex = getRandomFruitIndex();
   nextFruitIndex = getRandomFruitIndex();
-  updateNextFruitPreview();
   
   // キャラクターの位置をリセット
   characterPosition = { x: playAreaWidth / 2, y: 30 };
@@ -310,4 +310,6 @@ function resetGame() {
   
   // 新しいフルーツを作成
   createNewFruit(characterPosition.x);
+  // フルーツが作成された時に次のフルーツ画像を更新
+  updateNextFruitPreview();
 }
