@@ -26,7 +26,7 @@ const render = Render.create({
     width: playAreaWidth,
     height: playAreaHeight,
     wireframes: false, // 実際の画像を表示するためワイヤーフレームを無効化
-    background: '#f0f0f0', // 背景色を設定（猫の画像ではなく単色に）
+    background: '#f0f0f0', // 背景色を設定
     pixelRatio: window.devicePixelRatio // デバイスのピクセル比に合わせる
   },
 });
@@ -54,7 +54,7 @@ const fruitImages = [
   "assets/fruit7.png",
   "assets/fruit8.png",
 ];
-const fruitSizes = [60, 90, 110, 130, 150, 170, 190, 230]; // フルーツごとの直径
+const fruitSizes = [70, 90, 130, 140, 160, 180, 200, 230]; // フルーツごとの直径（物理的な当たり判定サイズ）
 
 let score = 0;
 let currentFruitIndex = getRandomFruitIndex();
@@ -62,6 +62,23 @@ let nextFruitIndex = getRandomFruitIndex();
 let activeFruitBody = null;
 let isGameOver = false;
 let characterPosition = { x: playAreaWidth / 2, y: 30 };
+
+// 画像のプリロード処理
+const preloadedImages = [];
+function preloadImages() {
+  fruitImages.forEach((src, index) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = function() {
+      preloadedImages[index] = {
+        width: this.width,
+        height: this.height,
+        aspectRatio: this.width / this.height
+      };
+    };
+  });
+}
+preloadImages();
 
 // キャラクターの追加
 const characterElement = document.createElement("div");
@@ -72,6 +89,9 @@ playArea.appendChild(characterElement);
 // 次のフルーツ画像を更新
 function updateNextFruitPreview() {
   nextFruitImage.src = fruitImages[nextFruitIndex];
+  // 次のフルーツのプレビュー画像サイズを調整
+  nextFruitImage.style.width = "30px";
+  nextFruitImage.style.height = "30px";
 }
 
 // 初期フルーツを作成
@@ -83,24 +103,43 @@ function getRandomFruitIndex() {
   return Math.floor(Math.random() * 4); // 初期は小さいフルーツのみ生成
 }
 
+// 画像のスケールを計算する関数
+function calculateImageScale(fruitIndex, size) {
+  // 画像がプリロードされていない場合はデフォルト値を使用
+  if (!preloadedImages[fruitIndex]) {
+    return size / 100; // デフォルトの比率
+  }
+  
+  // 画像の実際のサイズに基づいてスケールを計算
+  const imgWidth = preloadedImages[fruitIndex].width;
+  return size / imgWidth;
+}
+
 // 新しいフルーツを作成する関数
 function createNewFruit(xPosition) {
   // キャラクターの位置を保存
   characterPosition.x = xPosition;
   
+  const fruitSize = fruitSizes[currentFruitIndex];
+  const radius = fruitSize / 2;
+  
+  // 画像のスケールを計算
+  const scale = calculateImageScale(currentFruitIndex, fruitSize);
+  
   // フルーツの物体を作成（キャラクターの少し左に配置）
-  activeFruitBody = Bodies.circle(xPosition - 20, 30, fruitSizes[currentFruitIndex] / 2, {
+  activeFruitBody = Bodies.circle(xPosition - 20, 30, radius, {
     render: {
       sprite: {
         texture: fruitImages[currentFruitIndex],
-        xScale: fruitSizes[currentFruitIndex] / fruitSizes[0],
-        yScale: fruitSizes[currentFruitIndex] / fruitSizes[0],
+        xScale: scale,
+        yScale: scale,
       },
     },
     restitution: 0.8,
     friction: 0.5,
     density: 0.01,
     isStatic: true, // 静的にして重力の影響を受けないようにする
+    fruitIndex: currentFruitIndex // フルーツの種類を保存
   });
   
   World.add(world, activeFruitBody);
@@ -197,6 +236,9 @@ Events.on(engine, "collisionStart", (event) => {
       
       const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
       const newSize = fruitSizes[nextIndex];
+      
+      // 画像のスケールを計算
+      const scale = calculateImageScale(nextIndex, newSize);
 
       const mergedBody = Bodies.circle(
         (bodyA.position.x + bodyB.position.x) / 2,
@@ -206,13 +248,14 @@ Events.on(engine, "collisionStart", (event) => {
           render: {
             sprite: {
               texture: fruitImages[nextIndex],
-              xScale: newSize / fruitSizes[0],
-              yScale: newSize / fruitSizes[0],
+              xScale: scale,
+              yScale: scale,
             },
           },
           restitution: bodyA.restitution,
           friction: bodyA.friction,
           density: bodyA.density,
+          fruitIndex: nextIndex // フルーツの種類を保存
         }
       );
 
