@@ -62,29 +62,43 @@ let nextFruitIndex = getRandomFruitIndex();
 let activeFruitBody = null;
 let isGameOver = false;
 let characterPosition = { x: playAreaWidth / 2, y: 30 };
-
-// 画像のプリロード処理
+let imagesLoaded = 0;
+let totalImages = fruitImages.length;
 const preloadedImages = [];
-function preloadImages() {
-  fruitImages.forEach((src, index) => {
-    const img = new Image();
-    img.src = src;
-    img.onload = function() {
-      preloadedImages[index] = {
-        width: this.width,
-        height: this.height,
-        aspectRatio: this.width / this.height
-      };
-    };
-  });
-}
-preloadImages();
 
 // キャラクターの追加
 const characterElement = document.createElement("div");
 characterElement.id = "character";
 characterElement.innerHTML = `<img src="assets/character.png" alt="キャラクター">`;
 playArea.appendChild(characterElement);
+
+// 画像のプリロード処理
+function preloadImages() {
+  fruitImages.forEach((src, index) => {
+    const img = new Image();
+    img.onload = function() {
+      preloadedImages[index] = {
+        width: this.width,
+        height: this.height,
+        aspectRatio: this.width / this.height
+      };
+      imagesLoaded++;
+      
+      // すべての画像が読み込まれたら初期化
+      if (imagesLoaded === totalImages) {
+        initializeGame();
+      }
+    };
+    img.src = src;
+  });
+}
+
+// ゲームの初期化
+function initializeGame() {
+  // 初期フルーツを作成
+  createNewFruit(playAreaWidth / 2);
+  updateNextFruitPreview();
+}
 
 // 次のフルーツ画像を更新
 function updateNextFruitPreview() {
@@ -93,10 +107,6 @@ function updateNextFruitPreview() {
   nextFruitImage.style.width = "30px";
   nextFruitImage.style.height = "30px";
 }
-
-// 初期フルーツを作成
-createNewFruit(playAreaWidth / 2);
-updateNextFruitPreview();
 
 // ランダムなフルーツインデックスを取得する関数
 function getRandomFruitIndex() {
@@ -356,3 +366,6 @@ function resetGame() {
   // フルーツが作成された時に次のフルーツ画像を更新
   updateNextFruitPreview();
 }
+
+// 画像のプリロードを開始
+preloadImages();
