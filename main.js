@@ -81,7 +81,6 @@ function playSound(soundName) {
     source.start(0);
   }
 }
-}
 
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
@@ -456,4 +455,3 @@ function resetGame() {
 
 // 画像のプリロードを開始
 preloadImages();
-
