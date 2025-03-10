@@ -93,7 +93,6 @@ canvas {
 #character {
   position: absolute;
   z-index: 2;
-  transition: left 0.1s ease;
 }
 
 #character img {
