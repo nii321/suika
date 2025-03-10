@@ -6,6 +6,7 @@ const playArea = document.getElementById("play-area");
 const scoreElement = document.getElementById("score");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
+const gameContainer = document.getElementById("game-container");
 
 // 次のフルーツ表示要素
 const nextFruitImage = document.getElementById("next-fruit-image");
@@ -139,7 +140,6 @@ const characterElement = document.createElement("div");
 characterElement.id = "character";
 characterElement.innerHTML = `<img src="assets/character.png" alt="キャラクター">`;
 playArea.appendChild(characterElement);
-
 // 画像のプリロード処理
 function preloadImages() {
   fruitImages.forEach((src, index) => {
@@ -230,11 +230,10 @@ function createNewFruit(xPosition) {
 function updateCharacterPosition(xPosition) {
   characterPosition.x = xPosition;
   characterElement.style.left = xPosition + 'px';
-  characterElement.style.top = '30px'; // フルーツと同じ高さ
+  characterElement.style.top = '20px'; // 30pxから20pxに変更して上に移動
 }
-
-// タッチ操作でフルーツとキャラクターを移動
-playArea.addEventListener("touchstart", (event) => {
+// タッチ操作でフルーツとキャラクターを移動（game-container全体に設定）
+gameContainer.addEventListener("touchstart", (event) => {
   if (isGameOver) return;
 
   // 初回のユーザーインタラクション時にオーディオを初期化
@@ -245,7 +244,7 @@ playArea.addEventListener("touchstart", (event) => {
   const touch = event.touches[0];
   // タッチ位置をプレイエリア内の座標に変換
   const rect = playArea.getBoundingClientRect();
-  const xPosition = touch.clientX - rect.left;
+  const xPosition = Math.min(Math.max(touch.clientX - rect.left, 0), playAreaWidth);
   
   // フルーツとキャラクターの位置を更新
   if (activeFruitBody) {
@@ -258,12 +257,12 @@ playArea.addEventListener("touchstart", (event) => {
 });
 
 // 指が動いたときにフルーツとキャラクターが左右のみ追従する
-playArea.addEventListener("touchmove", (event) => {
+gameContainer.addEventListener("touchmove", (event) => {
   if (!activeFruitBody || isGameOver) return;
 
   const touch = event.touches[0];
   const rect = playArea.getBoundingClientRect();
-  const xPosition = touch.clientX - rect.left;
+  const xPosition = Math.min(Math.max(touch.clientX - rect.left, 0), playAreaWidth);
   
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
@@ -276,7 +275,7 @@ playArea.addEventListener("touchmove", (event) => {
 });
 
 // 指を離したときにフルーツが落下する
-playArea.addEventListener("touchend", () => {
+gameContainer.addEventListener("touchend", () => {
   if (!activeFruitBody || isGameOver) return;
 
   // 静的状態を解除して重力の影響を受けるようにする
@@ -301,7 +300,6 @@ playArea.addEventListener("touchend", () => {
   // フルーツの参照をリセット
   activeFruitBody = null;
 });
-
 // 合体ロジック（同じ種類のフルーツが接触した場合）
 Events.on(engine, "collisionStart", (event) => {
   const pairs = event.pairs;
@@ -443,7 +441,7 @@ function resetGame() {
   ];
   World.add(world, walls);
   
-    // スコアリセット
+  // スコアリセット
   score = 0;
   scoreElement.textContent = score;
   
