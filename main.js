@@ -70,13 +70,17 @@ function playSound(soundName) {
   }
 }
 
+// プレイエリアのサイズを取得・設定
+const playAreaWidth = window.innerWidth - 20; // 余白を考慮
+const playAreaHeight = playAreaWidth * 1.2; // 横幅の1.2倍
+
+// プレイエリアのサイズを設定
+playArea.style.width = playAreaWidth + 'px';
+playArea.style.height = playAreaHeight + 'px';
+
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
 const world = engine.world;
-
-// プレイエリアのサイズを取得
-const playAreaWidth = playArea.offsetWidth;
-const playAreaHeight = playArea.offsetHeight;
 
 // Matter.js のレンダラーを作成
 const render = Render.create({
@@ -114,7 +118,11 @@ const fruitImages = [
   "assets/fruit7.png",
   "assets/fruit8.png",
 ];
-const fruitSizes = [35, 60, 100, 130, 160, 180, 200, 230]; // フルーツごとの直径（物理的な当たり判定サイズ）
+
+// フルーツのサイズを画面サイズに応じて計算
+const baseFruitSize = playAreaWidth / 3; // fruit6のサイズ（画面横幅の1/3）
+const sizeRatios = [35, 60, 100, 130, 160, 180, 200, 230];
+const fruitSizes = sizeRatios.map(ratio => (baseFruitSize * ratio / 180)); // 180はfruit6の比率
 
 let score = 0;
 let currentFruitIndex = getRandomFruitIndex();
@@ -435,7 +443,7 @@ function resetGame() {
   ];
   World.add(world, walls);
   
-  // スコアリセット
+    // スコアリセット
   score = 0;
   scoreElement.textContent = score;
   
@@ -456,7 +464,6 @@ function resetGame() {
   
   // 新しいフルーツを作成
   createNewFruit(characterPosition.x);
-
   // フルーツが作成された時に次のフルーツ画像を更新
   updateNextFruitPreview();
 }
