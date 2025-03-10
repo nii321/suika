@@ -10,6 +10,22 @@ const restartButton = document.getElementById("restart-button");
 // 次のフルーツ表示要素
 const nextFruitImage = document.getElementById("next-fruit-image");
 
+// 効果音オブジェクトを作成
+const sounds = {
+  drop: document.getElementById("dropSound"),
+  merge: document.getElementById("mergeSound"),
+  fail: document.getElementById("failSound")
+};
+
+// 効果音を再生する関数
+function playSound(soundName) {
+  const sound = sounds[soundName];
+  if (sound) {
+    sound.currentTime = 0; // 再生位置をリセット
+    sound.play();
+  }
+}
+
 // Matter.js のエンジンとワールドを作成
 const engine = Engine.create();
 const world = engine.world;
@@ -209,6 +225,9 @@ playArea.addEventListener("touchend", () => {
   // 静的状態を解除して重力の影響を受けるようにする
   Body.setStatic(activeFruitBody, false);
   
+  // 落下音を再生
+  playSound("drop");
+  
   // 次のフルーツを準備（ここでは画像更新しない）
   currentFruitIndex = nextFruitIndex;
   nextFruitIndex = getRandomFruitIndex();
@@ -273,6 +292,9 @@ Events.on(engine, "collisionStart", (event) => {
       World.remove(world, bodyA);
       World.remove(world, bodyB);
 
+      // 合体音を再生
+      playSound("merge");
+
       score += (nextIndex + 1) * 10; // スコア加算（大きなフルーツほど高得点）
       scoreElement.textContent = score;
     }
@@ -307,6 +329,9 @@ function checkGameOver() {
 // ゲームオーバー処理を関数化
 function triggerGameOver() {
   isGameOver = true;
+  
+  // 失敗音を再生
+  playSound("fail");
   
   // ゲームオーバー画面を表示
   gameOverScreen.classList.remove("hidden");
@@ -369,3 +394,4 @@ function resetGame() {
 
 // 画像のプリロードを開始
 preloadImages();
+
