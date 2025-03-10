@@ -122,7 +122,7 @@ const fruitImages = [
 
 // フルーツのサイズを画面サイズに応じて計算
 const baseFruitSize = playAreaWidth / 3; // fruit6のサイズ（画面横幅の1/3）
-const sizeRatios = [35, 60, 100, 130, 160, 180, 200, 230];
+const sizeRatios = [35, 60, 100, 130, 160, 180, 200, 300];
 const fruitSizes = sizeRatios.map(ratio => (baseFruitSize * ratio / 180)); // 180はfruit6の比率
 
 let score = 0;
