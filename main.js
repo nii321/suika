@@ -114,7 +114,7 @@ const fruitImages = [
   "assets/fruit7.png",
   "assets/fruit8.png",
 ];
-const fruitSizes = [40, 65, 100, 130, 160, 180, 200, 230]; // フルーツごとの直径（物理的な当たり判定サイズ）
+const fruitSizes = [20, 65, 100, 130, 160, 180, 200, 230]; // フルーツごとの直径（物理的な当たり判定サイズ）
 
 let score = 0;
 let currentFruitIndex = getRandomFruitIndex();
