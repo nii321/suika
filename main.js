@@ -16,7 +16,9 @@ let soundBuffers = {};
 const soundFiles = {
   drop: "assets/drop.mp3",
   merge: "assets/merge.mp3",
-  fail: "assets/fail.mp3"
+  fail: "assets/fail.mp3",
+  watermelon_created: "assets/watermelon_created.mp3",
+  watermelon: "assets/watermelon.mp3"
 };
 
 // AudioContext の初期化とサウンドの読み込み
@@ -310,6 +312,20 @@ Events.on(engine, "collisionStart", (event) => {
       const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
       if (fruitIndex < 0) return;
       
+      // スイカ同士の合体の場合は両方消す
+      if (fruitIndex === 7) { // fruit8（スイカ）の場合
+        World.remove(world, bodyA);
+        World.remove(world, bodyB);
+        
+        // スイカ同士の合体音を再生
+        playSound("watermelon");
+        
+        // スコア加算（スイカ同士の合体でボーナス）
+        score += 100;
+        scoreElement.textContent = score;
+        return;
+      }
+      
       const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
       const newSize = fruitSizes[nextIndex];
       
@@ -339,8 +355,13 @@ Events.on(engine, "collisionStart", (event) => {
       World.remove(world, bodyA);
       World.remove(world, bodyB);
 
-      // 合体音を再生
-      playSound("merge");
+      // fruit7が合体してスイカができた場合、特別な効果音を再生
+      if (fruitIndex === 6) { // fruit7の場合
+        playSound("watermelon_created");
+      } else {
+        // 通常の合体音を再生
+        playSound("merge");
+      }
 
       score += (nextIndex + 1) * 10; // スコア加算（大きなフルーツほど高得点）
       scoreElement.textContent = score;
@@ -435,6 +456,7 @@ function resetGame() {
   
   // 新しいフルーツを作成
   createNewFruit(characterPosition.x);
+
   // フルーツが作成された時に次のフルーツ画像を更新
   updateNextFruitPreview();
 }
