@@ -10,19 +10,61 @@ const restartButton = document.getElementById("restart-button");
 // 次のフルーツ表示要素
 const nextFruitImage = document.getElementById("next-fruit-image");
 
-// 効果音オブジェクトを作成
-const sounds = {
-  drop: document.getElementById("dropSound"),
-  merge: document.getElementById("mergeSound"),
-  fail: document.getElementById("failSound")
+// Web Audio API の初期化
+let audioContext;
+let soundBuffers = {};
+const soundFiles = {
+  drop: "assets/drop.mp3",
+  merge: "assets/merge.mp3",
+  fail: "assets/fail.mp3"
 };
+
+// AudioContext の初期化とサウンドの読み込み
+function initAudio() {
+  // AudioContext はユーザーのインタラクションが必要なため、遅延初期化
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  
+  // 各サウンドファイルを読み込む
+  Object.keys(soundFiles).forEach(soundName => {
+    const request = new XMLHttpRequest();
+    request.open('GET', soundFiles[soundName], true);
+    request.responseType = 'arraybuffer';
+    
+    request.onload = function() {
+      audioContext.decodeAudioData(request.response, function(buffer) {
+        soundBuffers[soundName] = buffer;
+      }, function(error) {
+        console.error('デコードエラー:', error);
+      });
+    };
+    
+    request.onerror = function() {
+      console.error('サウンドファイルの読み込みに失敗しました');
+    };
+    
+    request.send();
+  });
+}
 
 // 効果音を再生する関数
 function playSound(soundName) {
-  const sound = sounds[soundName];
-  if (sound) {
-    sound.currentTime = 0; // 再生位置をリセット
-    sound.play();
+  if (!audioContext) {
+    // 初回のユーザーインタラクション時にオーディオを初期化
+    initAudio();
+    return; // 初回は音を鳴らさない（バッファがまだ読み込まれていないため）
+  }
+  
+  // 一時停止状態の場合は再開
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+  
+  const buffer = soundBuffers[soundName];
+  if (buffer) {
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioContext.destination);
+    source.start(0);
   }
 }
 
@@ -184,6 +226,11 @@ function updateCharacterPosition(xPosition) {
 // タッチ操作でフルーツとキャラクターを移動
 playArea.addEventListener("touchstart", (event) => {
   if (isGameOver) return;
+
+  // 初回のユーザーインタラクション時にオーディオを初期化
+  if (!audioContext) {
+    initAudio();
+  }
 
   const touch = event.touches[0];
   // タッチ位置をプレイエリア内の座標に変換
