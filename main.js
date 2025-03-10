@@ -63,9 +63,24 @@ function playSound(soundName) {
   if (buffer) {
     const source = audioContext.createBufferSource();
     source.buffer = buffer;
-    source.connect(audioContext.destination);
+    
+    // GainNodeを作成して音量を調整
+    const gainNode = audioContext.createGain();
+    
+    // failSoundの場合は音量を小さく設定
+    if (soundName === 'fail') {
+      gainNode.gain.value = 0.3; // 0.0〜1.0の範囲で設定（小さいほど音量が小さい）
+    } else {
+      gainNode.gain.value = 1.0; // 他の音は通常音量
+    }
+    
+    // 接続: source → gainNode → destination
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
     source.start(0);
   }
+}
 }
 
 // Matter.js のエンジンとワールドを作成
