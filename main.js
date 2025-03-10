@@ -450,7 +450,7 @@ function resetGame() {
   nextFruitIndex = getRandomFruitIndex();
   
   // キャラクターの位置をリセット
-  characterPosition = { x: playAreaWidth / 2, y: 30 };
+  characterPosition = { x: playAreaWidth / 2, y: 20 };
   updateCharacterPosition(characterPosition.x);
   
   // 状態リセット
