@@ -139,7 +139,7 @@ canvas {
 /* ランキングボード */
 #ranking-board {
   position: absolute;
-  bottom: 20px; /* プレイエリアの下に配置 */
+  top: calc(100% + 10px); /* プレイエリアの下端から10px下に配置 */
   left: 20px;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
@@ -176,3 +176,4 @@ canvas {
   background-color: #ffcc00;
   font-weight: bold;
 }
+
