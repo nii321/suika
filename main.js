@@ -4,12 +4,16 @@ const { Engine, Render, Runner, World, Bodies, Body, Events, Composite } = Matte
 // ゲームの主要な設定
 const playArea = document.getElementById("play-area");
 const scoreElement = document.getElementById("score");
+const highScoreElement = document.getElementById("high-score");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 const gameContainer = document.getElementById("game-container");
 
 // 次のフルーツ表示要素
 const nextFruitImage = document.getElementById("next-fruit-image");
+
+// ハイスコア変数
+let highScore = 0;
 
 // Web Audio API の初期化
 let audioContext;
@@ -140,6 +144,29 @@ const characterElement = document.createElement("div");
 characterElement.id = "character";
 characterElement.innerHTML = `<img src="assets/character.png" alt="キャラクター">`;
 playArea.appendChild(characterElement);
+
+// ハイスコアの読み込み
+function loadHighScore() {
+  const savedHighScore = localStorage.getItem('suikaGameHighScore');
+  if (savedHighScore) {
+    highScore = parseInt(savedHighScore);
+    highScoreElement.textContent = highScore;
+  }
+}
+
+// スコア更新時にハイスコアも確認・更新
+function updateScore(newScore) {
+  score = newScore;
+  scoreElement.textContent = score;
+  
+  // ハイスコアの更新
+  if (score > highScore) {
+    highScore = score;
+    highScoreElement.textContent = highScore;
+    localStorage.setItem('suikaGameHighScore', highScore.toString());
+  }
+}
+
 // 画像のプリロード処理
 function preloadImages() {
   fruitImages.forEach((src, index) => {
@@ -163,6 +190,9 @@ function preloadImages() {
 
 // ゲームの初期化
 function initializeGame() {
+  // ハイスコアを読み込む
+  loadHighScore();
+  
   // 初期フルーツを作成
   createNewFruit(playAreaWidth / 2);
   updateNextFruitPreview();
@@ -331,8 +361,7 @@ Events.on(engine, "collisionStart", (event) => {
         playSound("watermelon");
         
         // スコア加算（スイカ同士の合体でボーナス）
-        score += 100;
-        scoreElement.textContent = score;
+        updateScore(score + 100);
         return;
       }
       
@@ -373,8 +402,8 @@ Events.on(engine, "collisionStart", (event) => {
         playSound("merge");
       }
 
-      score += (nextIndex + 1) * 10; // スコア加算（大きなフルーツほど高得点）
-      scoreElement.textContent = score;
+      // スコア加算（大きなフルーツほど高得点）
+      updateScore(score + (nextIndex + 1) * 10);
     }
   });
 });
@@ -428,26 +457,29 @@ Events.on(engine, "afterUpdate", checkGameOver);
 
 // リスタートボタンのクリックイベント
 restartButton.addEventListener("click", () => {
-  // ゲームをリセット
-  resetGame();
+// ゲームをリセット
+resetGame();
 });
 
 // ゲームリセット関数
 function resetGame() {
-  // すべてのフルーツを削除（Composite.clearを使用）
-  Composite.clear(world, false, true);
-  
-  // 壁を再追加（上辺なし、左右は途中から）
-  const walls = [
-    Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
-    Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
-    Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
+// すべてのフルーツを削除（Composite.clearを使用）
+Composite.clear(world, false, true);
+
+// 壁を再追加（上辺なし、左右は途中から）
+const walls = [
+Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
+Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
+Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
 ];
 World.add(world, walls);
 
 // スコアリセット
 score = 0;
 scoreElement.textContent = score;
+
+// ハイスコアは保持したまま表示
+highScoreElement.textContent = highScore;
 
 // フルーツリセット
 currentFruitIndex = getRandomFruitIndex();
@@ -472,5 +504,3 @@ updateNextFruitPreview();
 
 // 画像のプリロードを開始
 preloadImages();
-
-
