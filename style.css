@@ -135,3 +135,15 @@ canvas {
    cursor: pointer;
    background-color: #ff6633;
 }
+
+#high-score-display {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
