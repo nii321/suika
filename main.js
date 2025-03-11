@@ -11,23 +11,6 @@ const gameContainer = document.getElementById("game-container");
 // 次のフルーツ表示要素
 const nextFruitImage = document.getElementById("next-fruit-image");
 
-// ランキングボードの作成
-const rankingBoard = document.createElement("div");
-rankingBoard.id = "ranking-board";
-rankingBoard.innerHTML = `
-  <h3>スコアランキング</h3>
-  <table id="ranking-table">
-    <tbody>
-      <tr><td>1位</td><td>---</td></tr>
-      <tr><td>2位</td><td>---</td></tr>
-      <tr><td>3位</td><td>---</td></tr>
-      <tr><td>4位</td><td>---</td></tr>
-      <tr id="current-score-row" class="highlight"><td>現在</td><td>0</td></tr>
-    </tbody>
-  </table>
-`;
-playArea.appendChild(rankingBoard);
-
 // スコアランキング配列
 let scoreRanking = [];
 const MAX_RANKING_SIZE = 100;
@@ -210,40 +193,55 @@ function updateRankingDisplay() {
   const tbody = table.getElementsByTagName("tbody")[0];
   
   // 現在のスコア行を除く全ての行を削除
-  const rows = tbody.getElementsByTagName("tr");
-  const currentScoreRow = document.getElementById("current-score-row");
-  
-  // 上位4位のスコアを表示
-  for (let i = 0; i < 4; i++) {
-    let scoreValue = "---";
-    if (i < scoreRanking.length) {
-      scoreValue = scoreRanking[i];
-    }
-    
-    // 既存の行を更新または新しい行を作成
-    if (i < rows.length - 1) { // 現在のスコア行を除く
-      rows[i].cells[1].textContent = scoreValue;
-    } else {
-      const newRow = document.createElement("tr");
-      newRow.innerHTML = `<td>${i+1}位</td><td>${scoreValue}</td>`;
-      tbody.insertBefore(newRow, currentScoreRow);
-    }
+  while (tbody.firstChild) {
+    tbody.removeChild(tbody.firstChild);
   }
-  
-  // 現在のスコアを更新
-  currentScoreRow.cells[1].textContent = score;
   
   // 現在のスコアの順位を計算
-  let currentRank = scoreRanking.indexOf(score) + 1;
-  if (currentRank === 0) { // スコアがランキングにない場合
-    currentRank = "圏外";
+  let currentRank = scoreRanking.length + 1; // デフォルトは最下位
+  for (let i = 0; i < scoreRanking.length; i++) {
+    if (score >= scoreRanking[i]) {
+      currentRank = i + 1;
+      break;
+    }
   }
-  currentScoreRow.cells[0].textContent = `現在 (${currentRank})`;
   
-  // 現在のスコアが上位4位に入っている場合、対応する行をハイライト
-  if (currentRank <= 4 && currentRank !== "圏外") {
-    const rankRow = tbody.getElementsByTagName("tr")[currentRank - 1];
-    rankRow.classList.add("highlight");
+  // 表示するスコアの配列を作成
+  let displayScores = [...scoreRanking];
+  
+  // 現在のスコアがまだランキングに入っていない場合は追加
+  if (!scoreRanking.includes(score) && score > 0) {
+    // 現在のスコアを適切な位置に挿入
+    displayScores.splice(currentRank - 1, 0, score);
+  }
+  
+  // 表示するスコアを最大5件に制限
+  displayScores = displayScores.slice(0, 5);
+  
+  // スコアを表示
+  for (let i = 0; i < displayScores.length; i++) {
+    const scoreValue = displayScores[i];
+    const rank = i + 1;
+    
+    const row = document.createElement("tr");
+    
+    // 現在のスコアの場合はハイライト
+    if (scoreValue === score && score > 0) {
+      row.classList.add("highlight");
+      row.innerHTML = `<td>現在 (${currentRank}位)</td><td>${scoreValue}</td>`;
+    } else {
+      row.innerHTML = `<td>${rank}位</td><td>${scoreValue}</td>`;
+    }
+    
+    tbody.appendChild(row);
+  }
+  
+  // スコアがない場合は「現在」の行を追加
+  if (score === 0 || displayScores.length === 0) {
+    const currentRow = document.createElement("tr");
+    currentRow.classList.add("highlight");
+    currentRow.innerHTML = `<td>現在</td><td>${score}</td>`;
+    tbody.appendChild(currentRow);
   }
 }
 
@@ -252,19 +250,8 @@ function updateScore(newScore) {
   score = newScore;
   scoreElement.textContent = score;
   
-  // 現在のスコア表示を更新
-  const currentScoreRow = document.getElementById("current-score-row");
-  currentScoreRow.cells[1].textContent = score;
-  
-  // ランキング内での位置を計算して表示
-  let currentRank = "圏外";
-  for (let i = 0; i < scoreRanking.length; i++) {
-    if (score >= scoreRanking[i]) {
-      currentRank = i + 1;
-      break;
-    }
-  }
-  currentScoreRow.cells[0].textContent = `現在 (${currentRank})`;
+  // ランキング表示を更新
+  updateRankingDisplay();
 }
 
 // 画像のプリロード処理
@@ -442,30 +429,29 @@ Events.on(engine, "collisionStart", (event) => {
     const bodyA = pair.bodyA;
     const bodyB = pair.bodyB;
 
- // 壁との衝突は無視
-if (bodyA.isStatic && bodyA !== activeFruitBody) return;
-if (bodyB.isStatic && bodyB !== activeFruitBody) return;
+    // 壁との衝突は無視
+    if (bodyA.isStatic && bodyA !== activeFruitBody) return;
+    if (bodyB.isStatic && bodyB !== activeFruitBody) return;
 
     if (bodyA.render.sprite && bodyB.render.sprite && 
-    bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
-  // 合体処理：次の段階のフルーツに進化させる
-  const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
-  if (fruitIndex < 0) return;
-  
-  // スイカ同士の合体の場合は両方消す
-  if (fruitIndex === 7) { // fruit8（スイカ）の場合
-    World.remove(world, bodyA);
-    World.remove(world, bodyB);
-    
-    // スイカ同士の合体音を再生
-    playSound("watermelon");
-    
-    // スコア加算（スイカ同士の合体でボーナス）
-    updateScore(score + 100);
-    return;
-  }
-  
-  const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
+        bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
+      // 合体処理：次の段階のフルーツに進化させる
+      const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
+      if (fruitIndex < 0) return;
+      
+      // スイカ同士の合体の場合は両方消す
+      if (fruitIndex === 7) { // fruit8（スイカ）の場合
+        World.remove(world, bodyA);
+        World.remove(world, bodyB);
+        
+        // スイカ同士の合体音を再生
+        playSound("watermelon");
+        
+       // スコア加算（スイカ同士の合体でボーナス）
+updateScore(score + 100);
+return;
+}
+    const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
   const newSize = fruitSizes[nextIndex];
   
   // 画像のスケールを計算
@@ -505,6 +491,7 @@ if (bodyB.isStatic && bodyB !== activeFruitBody) return;
   // スコア加算（大きなフルーツほど高得点）
   updateScore(score + (nextIndex + 1) * 10);
 }
+
 });
 });
 
