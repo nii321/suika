@@ -209,38 +209,64 @@ function updateRankingDisplay() {
   // 表示するスコアの配列を作成
   let displayScores = [...scoreRanking];
   
-  // 現在のスコアがまだランキングに入っていない場合は追加
-  if (!scoreRanking.includes(score) && score > 0) {
-    // 現在のスコアを適切な位置に挿入
-    displayScores.splice(currentRank - 1, 0, score);
-  }
-  
-  // 表示するスコアを最大5件に制限
-  displayScores = displayScores.slice(0, 5);
-  
-  // 現在のスコア行を追加（常に表示）
-  const currentRow = document.createElement("tr");
-  currentRow.classList.add("highlight");
-  
-  if (score > 0 && displayScores.includes(score)) {
-    currentRow.innerHTML = `<td>現在 (${currentRank}位)</td><td>${score}</td>`;
+  // 現在のスコアが0より大きい場合、表示順を調整
+  if (score > 0) {
+    // 現在のスコアが5位以内の場合
+    if (currentRank <= 5) {
+      // 現在のスコア行を追加（順位に応じた位置に）
+      const currentRow = document.createElement("tr");
+      currentRow.classList.add("highlight");
+      currentRow.innerHTML = `<td>現在 (${currentRank}位)</td><td>${score}</td>`;
+      
+      // 現在のスコアより上位のスコアを表示
+      for (let i = 0; i < currentRank - 1; i++) {
+        const rank = i + 1;
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${rank}位</td><td>${displayScores[i]}</td>`;
+        tbody.appendChild(row);
+      }
+      
+      // 現在のスコア行を追加
+      tbody.appendChild(currentRow);
+      
+      // 現在のスコアより下位のスコアを表示（5位まで）
+      for (let i = currentRank - 1; i < Math.min(5, displayScores.length); i++) {
+        const rank = i + 1;
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${rank}位</td><td>${displayScores[i]}</td>`;
+        tbody.appendChild(row);
+      }
+    } else {
+      // 現在のスコアが5位より下の場合、上位5件と現在のスコアを表示
+      // 上位5件を表示
+      for (let i = 0; i < Math.min(5, displayScores.length); i++) {
+        const rank = i + 1;
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${rank}位</td><td>${displayScores[i]}</td>`;
+        tbody.appendChild(row);
+      }
+      
+      // 現在のスコア行を一番下に追加
+      const currentRow = document.createElement("tr");
+      currentRow.classList.add("highlight");
+      currentRow.innerHTML = `<td>現在 (${currentRank}位)</td><td>${score}</td>`;
+      tbody.appendChild(currentRow);
+    }
   } else {
-    currentRow.innerHTML = `<td>現在</td><td>${score}</td>`;
-  }
-  
-  tbody.appendChild(currentRow);
-  
-  // スコアを表示（現在のスコアを除く）
-  for (let i = 0; i < displayScores.length; i++) {
-    const scoreValue = displayScores[i];
-    const rank = i + 1;
-    
-    // 現在のスコアでなければ表示
-    if (scoreValue !== score || score === 0) {
+    // スコアが0の場合は単純に上位5件と現在のスコアを表示
+    // 上位5件を表示
+    for (let i = 0; i < Math.min(5, displayScores.length); i++) {
+      const rank = i + 1;
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${rank}位</td><td>${scoreValue}</td>`;
+      row.innerHTML = `<td>${rank}位</td><td>${displayScores[i]}</td>`;
       tbody.appendChild(row);
     }
+    
+    // 現在のスコア行を追加
+    const currentRow = document.createElement("tr");
+    currentRow.classList.add("highlight");
+    currentRow.innerHTML = `<td>現在</td><td>${score}</td>`;
+    tbody.appendChild(currentRow);
   }
 }
 
@@ -415,6 +441,7 @@ gameContainer.addEventListener("touchend", () => {
       updateNextFruitPreview();
     }
   }, 500);
+  
   
   // フルーツの参照をリセット
   activeFruitBody = null;
