@@ -197,6 +197,7 @@ function calculateImageScale(fruitIndex, size) {
 function createNewFruit(xPosition) {
   // キャラクターの位置を保存
   characterPosition.x = xPosition;
+  characterPosition.y = 20; // 高さを20に固定
   
   const fruitSize = fruitSizes[currentFruitIndex];
   const radius = fruitSize / 2;
@@ -229,9 +230,11 @@ function createNewFruit(xPosition) {
 // キャラクターの位置を更新する関数
 function updateCharacterPosition(xPosition) {
   characterPosition.x = xPosition;
+  characterPosition.y = 20; // 高さを20に固定
   characterElement.style.left = xPosition + 'px';
-  characterElement.style.top = '20px'; // 30pxから20pxに変更して上に移動
+  characterElement.style.top = '20px'; // 高さを20pxに固定
 }
+
 // タッチ操作でフルーツとキャラクターを移動（game-container全体に設定）
 gameContainer.addEventListener("touchstart", (event) => {
   if (isGameOver) return;
@@ -250,7 +253,7 @@ gameContainer.addEventListener("touchstart", (event) => {
   if (activeFruitBody) {
     Body.setPosition(activeFruitBody, { 
       x: xPosition - 20, // キャラクターの少し左
-      y: 30
+      y: 30 // フルーツの高さは30で固定
     });
     updateCharacterPosition(xPosition);
   }
@@ -267,7 +270,7 @@ gameContainer.addEventListener("touchmove", (event) => {
   // y座標は固定したまま、x座標のみ更新
   Body.setPosition(activeFruitBody, { 
     x: xPosition - 20, // キャラクターの少し左
-    y: 30
+    y: 30 // フルーツの高さは30で固定
   });
   
   // キャラクターの位置も更新
@@ -300,6 +303,7 @@ gameContainer.addEventListener("touchend", () => {
   // フルーツの参照をリセット
   activeFruitBody = null;
 });
+
 // 合体ロジック（同じ種類のフルーツが接触した場合）
 Events.on(engine, "collisionStart", (event) => {
   const pairs = event.pairs;
@@ -438,33 +442,35 @@ function resetGame() {
     Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
     Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
     Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
-  ];
-  World.add(world, walls);
-  
-  // スコアリセット
-  score = 0;
-  scoreElement.textContent = score;
-  
-  // フルーツリセット
-  currentFruitIndex = getRandomFruitIndex();
-  nextFruitIndex = getRandomFruitIndex();
-  
-  // キャラクターの位置をリセット
-  characterPosition = { x: playAreaWidth / 2, y: 20 };
-  updateCharacterPosition(characterPosition.x);
-  
-  // 状態リセット
-  activeFruitBody = null;
-  isGameOver = false;
-  
-  // ゲームオーバー画面を非表示
-  gameOverScreen.classList.add("hidden");
-  
-  // 新しいフルーツを作成
-  createNewFruit(characterPosition.x);
-  // フルーツが作成された時に次のフルーツ画像を更新
-  updateNextFruitPreview();
+];
+World.add(world, walls);
+
+// スコアリセット
+score = 0;
+scoreElement.textContent = score;
+
+// フルーツリセット
+currentFruitIndex = getRandomFruitIndex();
+nextFruitIndex = getRandomFruitIndex();
+
+// キャラクターの位置をリセット
+characterPosition = { x: playAreaWidth / 2, y: 20 };
+updateCharacterPosition(characterPosition.x);
+
+// 状態リセット
+activeFruitBody = null;
+isGameOver = false;
+
+// ゲームオーバー画面を非表示
+gameOverScreen.classList.add("hidden");
+
+// 新しいフルーツを作成
+createNewFruit(characterPosition.x);
+// フルーツが作成された時に次のフルーツ画像を更新
+updateNextFruitPreview();
 }
 
 // 画像のプリロードを開始
 preloadImages();
+
+
