@@ -4,7 +4,6 @@ const { Engine, Render, Runner, World, Bodies, Body, Events, Composite } = Matte
 // ゲームの主要な設定
 const playArea = document.getElementById("play-area");
 const scoreElement = document.getElementById("score");
-const highScoreElement = document.getElementById("high-score");
 const gameOverScreen = document.getElementById("game-over");
 const restartButton = document.getElementById("restart-button");
 const gameContainer = document.getElementById("game-container");
@@ -12,8 +11,26 @@ const gameContainer = document.getElementById("game-container");
 // 次のフルーツ表示要素
 const nextFruitImage = document.getElementById("next-fruit-image");
 
-// ハイスコア変数
-let highScore = 0;
+// ランキングボードの作成
+const rankingBoard = document.createElement("div");
+rankingBoard.id = "ranking-board";
+rankingBoard.innerHTML = `
+  <h3>スコアランキング</h3>
+  <table id="ranking-table">
+    <tbody>
+      <tr><td>1位</td><td>---</td></tr>
+      <tr><td>2位</td><td>---</td></tr>
+      <tr><td>3位</td><td>---</td></tr>
+      <tr><td>4位</td><td>---</td></tr>
+      <tr id="current-score-row" class="highlight"><td>現在</td><td>0</td></tr>
+    </tbody>
+  </table>
+`;
+playArea.appendChild(rankingBoard);
+
+// スコアランキング配列
+let scoreRanking = [];
+const MAX_RANKING_SIZE = 100;
 
 // Web Audio API の初期化
 let audioContext;
@@ -145,26 +162,109 @@ characterElement.id = "character";
 characterElement.innerHTML = `<img src="assets/character.png" alt="キャラクター">`;
 playArea.appendChild(characterElement);
 
-// ハイスコアの読み込み
-function loadHighScore() {
-  const savedHighScore = localStorage.getItem('suikaGameHighScore');
-  if (savedHighScore) {
-    highScore = parseInt(savedHighScore);
-    highScoreElement.textContent = highScore;
+// ランキングの読み込み
+function loadRanking() {
+  const savedRanking = localStorage.getItem('suikaGameRanking');
+  if (savedRanking) {
+    scoreRanking = JSON.parse(savedRanking);
+  }
+  updateRankingDisplay();
+}
+
+// ランキングの保存
+function saveRanking() {
+  localStorage.setItem('suikaGameRanking', JSON.stringify(scoreRanking));
+}
+
+// ランキングにスコアを追加
+function addScoreToRanking(newScore) {
+  // 現在のスコアをランキングに追加
+  scoreRanking.push(newScore);
+  
+  // スコアの降順でソート
+  scoreRanking.sort((a, b) => b - a);
+  
+  // 最大100件に制限
+  if (scoreRanking.length > MAX_RANKING_SIZE) {
+    // 上位4位は保持し、5位以降からランダムに1つ削除
+    const topFour = scoreRanking.slice(0, 4);
+    const rest = scoreRanking.slice(4);
+    
+    // 5位以降からランダムにインデックスを選択して削除
+    const randomIndex = Math.floor(Math.random() * rest.length);
+    rest.splice(randomIndex, 1);
+    
+    scoreRanking = [...topFour, ...rest];
+  }
+  
+  // ランキングを保存
+  saveRanking();
+  
+  // 表示を更新
+  updateRankingDisplay();
+}
+
+// ランキング表示の更新
+function updateRankingDisplay() {
+  const table = document.getElementById("ranking-table");
+  const tbody = table.getElementsByTagName("tbody")[0];
+  
+  // 現在のスコア行を除く全ての行を削除
+  const rows = tbody.getElementsByTagName("tr");
+  const currentScoreRow = document.getElementById("current-score-row");
+  
+  // 上位4位のスコアを表示
+  for (let i = 0; i < 4; i++) {
+    let scoreValue = "---";
+    if (i < scoreRanking.length) {
+      scoreValue = scoreRanking[i];
+    }
+    
+    // 既存の行を更新または新しい行を作成
+    if (i < rows.length - 1) { // 現在のスコア行を除く
+      rows[i].cells[1].textContent = scoreValue;
+    } else {
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `<td>${i+1}位</td><td>${scoreValue}</td>`;
+      tbody.insertBefore(newRow, currentScoreRow);
+    }
+  }
+  
+  // 現在のスコアを更新
+  currentScoreRow.cells[1].textContent = score;
+  
+  // 現在のスコアの順位を計算
+  let currentRank = scoreRanking.indexOf(score) + 1;
+  if (currentRank === 0) { // スコアがランキングにない場合
+    currentRank = "圏外";
+  }
+  currentScoreRow.cells[0].textContent = `現在 (${currentRank})`;
+  
+  // 現在のスコアが上位4位に入っている場合、対応する行をハイライト
+  if (currentRank <= 4 && currentRank !== "圏外") {
+    const rankRow = tbody.getElementsByTagName("tr")[currentRank - 1];
+    rankRow.classList.add("highlight");
   }
 }
 
-// スコア更新時にハイスコアも確認・更新
+// スコア更新時にランキング表示も更新
 function updateScore(newScore) {
   score = newScore;
   scoreElement.textContent = score;
   
-  // ハイスコアの更新
-  if (score > highScore) {
-    highScore = score;
-    highScoreElement.textContent = highScore;
-    localStorage.setItem('suikaGameHighScore', highScore.toString());
+  // 現在のスコア表示を更新
+  const currentScoreRow = document.getElementById("current-score-row");
+  currentScoreRow.cells[1].textContent = score;
+  
+  // ランキング内での位置を計算して表示
+  let currentRank = "圏外";
+  for (let i = 0; i < scoreRanking.length; i++) {
+    if (score >= scoreRanking[i]) {
+      currentRank = i + 1;
+      break;
+    }
   }
+  currentScoreRow.cells[0].textContent = `現在 (${currentRank})`;
 }
 
 // 画像のプリロード処理
@@ -190,8 +290,8 @@ function preloadImages() {
 
 // ゲームの初期化
 function initializeGame() {
-  // ハイスコアを読み込む
-  loadHighScore();
+  // ランキングを読み込む
+  loadRanking();
   
   // 初期フルーツを作成
   createNewFruit(playAreaWidth / 2);
@@ -342,114 +442,117 @@ Events.on(engine, "collisionStart", (event) => {
     const bodyA = pair.bodyA;
     const bodyB = pair.bodyB;
 
-    // 壁との衝突は無視
-    if (bodyA.isStatic && bodyA !== activeFruitBody) return;
-    if (bodyB.isStatic && bodyB !== activeFruitBody) return;
+ // 壁との衝突は無視
+if (bodyA.isStatic && bodyA !== activeFruitBody) return;
+if (bodyB.isStatic && bodyB !== activeFruitBody) return;
 
     if (bodyA.render.sprite && bodyB.render.sprite && 
-        bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
-      // 合体処理：次の段階のフルーツに進化させる
-      const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
-      if (fruitIndex < 0) return;
-      
-      // スイカ同士の合体の場合は両方消す
-      if (fruitIndex === 7) { // fruit8（スイカ）の場合
-        World.remove(world, bodyA);
-        World.remove(world, bodyB);
-        
-        // スイカ同士の合体音を再生
-        playSound("watermelon");
-        
-        // スコア加算（スイカ同士の合体でボーナス）
-        updateScore(score + 100);
-        return;
-      }
-      
-      const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
-      const newSize = fruitSizes[nextIndex];
-      
-      // 画像のスケールを計算
-      const scale = calculateImageScale(nextIndex, newSize);
+    bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
+  // 合体処理：次の段階のフルーツに進化させる
+  const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
+  if (fruitIndex < 0) return;
+  
+  // スイカ同士の合体の場合は両方消す
+  if (fruitIndex === 7) { // fruit8（スイカ）の場合
+    World.remove(world, bodyA);
+    World.remove(world, bodyB);
+    
+    // スイカ同士の合体音を再生
+    playSound("watermelon");
+    
+    // スコア加算（スイカ同士の合体でボーナス）
+    updateScore(score + 100);
+    return;
+  }
+  
+  const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
+  const newSize = fruitSizes[nextIndex];
+  
+  // 画像のスケールを計算
+  const scale = calculateImageScale(nextIndex, newSize);
 
-      const mergedBody = Bodies.circle(
-        (bodyA.position.x + bodyB.position.x) / 2,
-        (bodyA.position.y + bodyB.position.y) / 2,
-        newSize / 2,
-        {
-          render: {
-            sprite: {
-              texture: fruitImages[nextIndex],
-              xScale: scale,
-              yScale: scale,
-            },
-          },
-          restitution: bodyA.restitution,
-          friction: bodyA.friction,
-          density: bodyA.density,
-          fruitIndex: nextIndex // フルーツの種類を保存
-        }
-      );
-
-      World.add(world, mergedBody);
-      World.remove(world, bodyA);
-      World.remove(world, bodyB);
-
-      // fruit7が合体してスイカができた場合、特別な効果音を再生
-      if (fruitIndex === 6) { // fruit7の場合
-        playSound("watermelon_created");
-      } else {
-        // 通常の合体音を再生
-        playSound("merge");
-      }
-
-      // スコア加算（大きなフルーツほど高得点）
-      updateScore(score + (nextIndex + 1) * 10);
+  const mergedBody = Bodies.circle(
+    (bodyA.position.x + bodyB.position.x) / 2,
+    (bodyA.position.y + bodyB.position.y) / 2,
+    newSize / 2,
+    {
+      render: {
+        sprite: {
+          texture: fruitImages[nextIndex],
+          xScale: scale,
+          yScale: scale,
+        },
+      },
+      restitution: bodyA.restitution,
+      friction: bodyA.friction,
+      density: bodyA.density,
+      fruitIndex: nextIndex // フルーツの種類を保存
     }
-  });
+  );
+
+  World.add(world, mergedBody);
+  World.remove(world, bodyA);
+  World.remove(world, bodyB);
+
+  // fruit7が合体してスイカができた場合、特別な効果音を再生
+  if (fruitIndex === 6) { // fruit7の場合
+    playSound("watermelon_created");
+  } else {
+    // 通常の合体音を再生
+    playSound("merge");
+  }
+
+  // スコア加算（大きなフルーツほど高得点）
+  updateScore(score + (nextIndex + 1) * 10);
+}
+});
 });
 
 // ゲームオーバー判定
 function checkGameOver() {
-  // すでにゲームオーバーなら処理しない
-  if (isGameOver) return;
-  
-  world.bodies.forEach((body) => {
-    // 静的でないボディ（フルーツ）が左右の枠線の開始位置より上で一定時間とどまった場合
-    if (!body.isStatic && body.position.y < 100 && body.position.y > 0) {
-      // フルーツが一定時間上部にとどまっているか確認
-      if (!body.gameOverTimer) {
-        body.gameOverTimer = 1;
-      } else {
-        body.gameOverTimer++;
-        // 一定時間（例：30フレーム）上部にとどまったらゲームオーバー
-        if (body.gameOverTimer > 30) {
-          triggerGameOver();
-        }
-      }
-    } else if (body.gameOverTimer) {
-      // 上部から離れたらタイマーをリセット
-      body.gameOverTimer = 0;
-    }
-  });
+// すでにゲームオーバーなら処理しない
+if (isGameOver) return;
+
+world.bodies.forEach((body) => {
+// 静的でないボディ（フルーツ）が左右の枠線の開始位置より上で一定時間とどまった場合
+if (!body.isStatic && body.position.y < 100 && body.position.y > 0) {
+// フルーツが一定時間上部にとどまっているか確認
+if (!body.gameOverTimer) {
+body.gameOverTimer = 1;
+} else {
+body.gameOverTimer++;
+// 一定時間（例：30フレーム）上部にとどまったらゲームオーバー
+if (body.gameOverTimer > 30) {
+triggerGameOver();
+}
+}
+} else if (body.gameOverTimer) {
+// 上部から離れたらタイマーをリセット
+body.gameOverTimer = 0;
+}
+});
 }
 
 // ゲームオーバー処理を関数化
 function triggerGameOver() {
-  isGameOver = true;
-  
-  // 失敗音を再生
-  playSound("fail");
-  
-  // ゲームオーバー画面を表示
-  gameOverScreen.classList.remove("hidden");
-  
-  // アクティブなフルーツがあれば削除
-  if (activeFruitBody) {
-    World.remove(world, activeFruitBody);
-    activeFruitBody = null;
-  }
-  
-  console.log("ゲームオーバー！");
+isGameOver = true;
+
+// 失敗音を再生
+playSound("fail");
+
+// 現在のスコアをランキングに追加
+addScoreToRanking(score);
+
+// ゲームオーバー画面を表示
+gameOverScreen.classList.remove("hidden");
+
+// アクティブなフルーツがあれば削除
+if (activeFruitBody) {
+World.remove(world, activeFruitBody);
+activeFruitBody = null;
+}
+
+console.log("ゲームオーバー！");
 }
 
 // 定期的にゲームオーバー判定を行う（フレームごとに判定）
@@ -478,9 +581,6 @@ World.add(world, walls);
 score = 0;
 scoreElement.textContent = score;
 
-// ハイスコアは保持したまま表示
-highScoreElement.textContent = highScore;
-
 // フルーツリセット
 currentFruitIndex = getRandomFruitIndex();
 nextFruitIndex = getRandomFruitIndex();
@@ -495,6 +595,9 @@ isGameOver = false;
 
 // ゲームオーバー画面を非表示
 gameOverScreen.classList.add("hidden");
+
+// ランキング表示を更新
+updateRankingDisplay();
 
 // 新しいフルーツを作成
 createNewFruit(characterPosition.x);
