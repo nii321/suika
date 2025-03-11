@@ -136,14 +136,40 @@ canvas {
    background-color: #ff6633;
 }
 
-#high-score-display {
+/* ランキングボード */
+#ranking-board {
   position: absolute;
   bottom: 20px;
   left: 20px;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
   border-radius: 5px;
-  font-size: 18px;
-  font-weight: bold;
+  z-index: 5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+#ranking-board h3 {
+  margin: 0 0 10px 0;
+  text-align: center;
+  color: #333;
+}
+
+#ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#ranking-table td {
+  padding: 5px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+#ranking-table tr:last-child td {
+  border-bottom: none;
+}
+
+#ranking-table tr.highlight {
+  background-color: #ffcc00;
+  font-weight: bold;
+}
