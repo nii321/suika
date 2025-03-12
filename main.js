@@ -436,12 +436,11 @@ gameContainer.addEventListener("touchend", () => {
   // 少し待ってから新しいフルーツを作成（キャラクターはそのまま）
   setTimeout(() => {
     if (!isGameOver) {
-      createNewFruit(characterPosition.x);
+       createNewFruit(characterPosition.x);
       // フルーツが作成された時に次のフルーツ画像を更新
       updateNextFruitPreview();
     }
   }, 500);
-  
   
   // フルーツの参照をリセット
   activeFruitBody = null;
@@ -459,16 +458,55 @@ Events.on(engine, "collisionStart", (event) => {
     if (bodyA.isStatic && bodyA !== activeFruitBody) return;
     if (bodyB.isStatic && bodyB !== activeFruitBody) return;
 
+    // もし両方が正五角形なら何もしない
+    if (bodyA.isPentagon && bodyB.isPentagon) return;
+
     if (bodyA.render.sprite && bodyB.render.sprite && 
         bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
       // 合体処理：次の段階のフルーツに進化させる
       const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
       if (fruitIndex < 0) return;
       
-          // スイカ同士の合体の場合は両方消す
+      // スイカ同士の合体の場合は正五角形を生成
       if (fruitIndex === 7) { // fruit8（スイカ）の場合
         World.remove(world, bodyA);
         World.remove(world, bodyB);
+        
+        // 正五角形のサイズをfruit4と同じに設定
+        const pentagonSize = fruitSizes[3]; // fruit4のサイズを使用
+        const pentagonRadius = pentagonSize / 2;
+        const pentagonVertices = [];
+        
+        // 正五角形の頂点を計算
+        for (let i = 0; i < 5; i++) {
+          const angle = 2 * Math.PI * i / 5 - Math.PI / 2; // 頂点が上を向くように調整
+          pentagonVertices.push({
+            x: pentagonRadius * Math.cos(angle),
+            y: pentagonRadius * Math.sin(angle)
+          });
+        }
+        
+        // 正五角形の物体を作成
+        const pentagonBody = Bodies.fromVertices(
+          (bodyA.position.x + bodyB.position.x) / 2,
+          (bodyA.position.y + bodyB.position.y) / 2,
+          [pentagonVertices],
+          {
+            render: {
+              sprite: {
+                texture: "assets/pentagon.png", // 正五角形の画像
+                xScale: calculateImageScale(3, pentagonSize), // fruit4のスケールを適用
+                yScale: calculateImageScale(3, pentagonSize)
+              }
+            },
+            restitution: 0.8,
+            friction: 0.5,
+            density: 0.01,
+            isPentagon: true // 正五角形かどうかを識別するためのフラグ
+          }
+        );
+        
+        World.add(world, pentagonBody);
         
         // スイカ同士の合体音を再生
         playSound("watermelon");
