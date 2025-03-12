@@ -616,7 +616,7 @@ function resetGame() {
 
   // 壁を再追加（上辺なし、左右は途中から）
   const walls = [
-    Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 10, { isStatic: true }), // 下部
+    Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 20, { isStatic: true }), // 下部
     Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
     Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
   ];
