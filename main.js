@@ -139,9 +139,6 @@ let imagesLoaded = 0;
 let totalImages = fruitImages.length;
 const preloadedImages = [];
 
-// 合体済みのフルーツを追跡する変数
-const processedBodies = new Set();
-
 // キャラクターの追加
 const characterElement = document.createElement("div");
 characterElement.id = "character";
@@ -439,18 +436,16 @@ gameContainer.addEventListener("touchend", () => {
   // 少し待ってから新しいフルーツを作成（キャラクターはそのまま）
   setTimeout(() => {
     if (!isGameOver) {
-       createNewFruit(characterPosition.x);
+      createNewFruit(characterPosition.x);
       // フルーツが作成された時に次のフルーツ画像を更新
       updateNextFruitPreview();
     }
   }, 500);
   
+  
   // フルーツの参照をリセット
   activeFruitBody = null;
 });
-
-// 合体済みのフルーツを追跡する変数
-const processedBodies = new Set();
 
 // 合体ロジック（同じ種類のフルーツが接触した場合）
 Events.on(engine, "collisionStart", (event) => {
@@ -464,62 +459,16 @@ Events.on(engine, "collisionStart", (event) => {
     if (bodyA.isStatic && bodyA !== activeFruitBody) return;
     if (bodyB.isStatic && bodyB !== activeFruitBody) return;
 
-    // 両方が正五角形の場合は合体しない
-    if (bodyA.isPentagon && bodyB.isPentagon) return;
-
-    // 既に処理済みのフルーツの場合はスキップ
-    if (processedBodies.has(bodyA.id) || processedBodies.has(bodyB.id)) return;
-
     if (bodyA.render.sprite && bodyB.render.sprite && 
         bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
-      // 処理済みとしてマーク
-      processedBodies.add(bodyA.id);
-      processedBodies.add(bodyB.id);
-      
       // 合体処理：次の段階のフルーツに進化させる
       const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
       if (fruitIndex < 0) return;
       
-      // スイカ同士の合体の場合は正五角形を生成
+          // スイカ同士の合体の場合は両方消す
       if (fruitIndex === 7) { // fruit8（スイカ）の場合
         World.remove(world, bodyA);
         World.remove(world, bodyB);
-        
-        // 正五角形のサイズをfruit4と同じに設定
-        const pentagonSize = fruitSizes[2]; // fruit4のサイズを使用
-        const pentagonRadius = pentagonSize / 2;
-        const pentagonVertices = [];
-        
-        // 正五角形の頂点を計算
-        for (let i = 0; i < 5; i++) {
-          const angle = 2 * Math.PI * i / 5 - Math.PI / 2; // 頂点が上を向くように調整
-          pentagonVertices.push({
-            x: pentagonRadius * Math.cos(angle),
-            y: pentagonRadius * Math.sin(angle)
-          });
-        }
-        
-        // 正五角形の物体を作成
-        const pentagonBody = Bodies.fromVertices(
-          (bodyA.position.x + bodyB.position.x) / 2,
-          (bodyA.position.y + bodyB.position.y) / 2,
-          [pentagonVertices],
-          {
-            render: {
-              sprite: {
-                texture: "assets/pentagon.png", // 正五角形の画像
-                xScale: calculateImageScale(2, pentagonSize), // fruit4のスケールを適用
-                yScale: calculateImageScale(2, pentagonSize)
-              }
-            },
-            restitution: 0.8,
-            friction: 0.5,
-            density: 0.01,
-            isPentagon: true // 正五角形かどうかを識別するためのフラグ
-          }
-        );
-        
-        World.add(world, pentagonBody);
         
         // スイカ同士の合体音を再生
         playSound("watermelon");
@@ -570,11 +519,6 @@ Events.on(engine, "collisionStart", (event) => {
       updateScore(score + (nextIndex + 1) * 10);
     }
   });
-  
-  // 1フレーム後に処理済みセットをクリア
-  setTimeout(() => {
-    processedBodies.clear();
-  }, 0);
 });
 
 // ゲームオーバー判定
