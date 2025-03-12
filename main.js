@@ -216,7 +216,7 @@ function updateRankingDisplay() {
       // 現在のスコア行を追加（順位に応じた位置に）
       const currentRow = document.createElement("tr");
       currentRow.classList.add("highlight");
-      currentRow.innerHTML = `<td>現在 (${currentRank}位)</td><td>${score}</td>`;
+      currentRow.innerHTML = `<td>いま (${currentRank}位)</td><td>${score}</td>`;
       
       // 現在のスコアより上位のスコアを表示
       for (let i = 0; i < currentRank - 1; i++) {
@@ -249,7 +249,7 @@ function updateRankingDisplay() {
       // 現在のスコア行を一番下に追加
       const currentRow = document.createElement("tr");
       currentRow.classList.add("highlight");
-      currentRow.innerHTML = `<td>現在 (${currentRank}位)</td><td>${score}</td>`;
+      currentRow.innerHTML = `<td>いま (${currentRank}位)</td><td>${score}</td>`;
       tbody.appendChild(currentRow);
     }
   } else {
@@ -265,7 +265,7 @@ function updateRankingDisplay() {
     // 現在のスコア行を追加
     const currentRow = document.createElement("tr");
     currentRow.classList.add("highlight");
-    currentRow.innerHTML = `<td>現在</td><td>${score}</td>`;
+    currentRow.innerHTML = `<td>いま</td><td>${score}</td>`;
     tbody.appendChild(currentRow);
   }
 }
