@@ -106,7 +106,7 @@ Runner.run(Runner.create(), engine);
 // 壁（プレイエリアの枠）を作成 - 上辺を削除、左右は途中から
 const walls = [
   // 上部の壁を削除
-  Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 30, { isStatic: true }), // 下部
+  Bodies.rectangle(playAreaWidth / 2, playAreaHeight, playAreaWidth, 30, fillStyle: '#8B4513'{ isStatic: true }), // 下部
   Bodies.rectangle(0, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 左側（上部100pxは除外）
   Bodies.rectangle(playAreaWidth, playAreaHeight / 2 + 100, 10, playAreaHeight - 100, { isStatic: true }), // 右側（上部100pxは除外）
 ];
