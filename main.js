@@ -122,11 +122,12 @@ const fruitImages = [
   "assets/fruit6.png",
   "assets/fruit7.png",
   "assets/fruit8.png",
+  "assets/pentagon.png", // 正五角形の画像を追加
 ];
 
 // フルーツのサイズを画面サイズに応じて計算
 const baseFruitSize = playAreaWidth / 3; // fruit6のサイズ（画面横幅の1/3）
-const sizeRatios = [35, 60, 100, 130, 160, 180, 200, 300];
+const sizeRatios = [35, 60, 100, 130, 160, 180, 200, 300, 80]; // 正五角形のサイズを80に設定
 const fruitSizes = sizeRatios.map(ratio => (baseFruitSize * ratio / 180)); // 180はfruit6の比率
 
 let score = 0;
@@ -186,7 +187,6 @@ function addScoreToRanking(newScore) {
   // 表示を更新
   updateRankingDisplay();
 }
-
 // ランキング表示の更新
 function updateRankingDisplay() {
   const table = document.getElementById("ranking-table");
@@ -404,7 +404,7 @@ gameContainer.addEventListener("touchstart", (event) => {
 // 指が動いたときにフルーツとキャラクターが左右のみ追従する
 gameContainer.addEventListener("touchmove", (event) => {
   if (!activeFruitBody || isGameOver) return;
-
+  
   const touch = event.touches[0];
   const rect = playArea.getBoundingClientRect();
   const xPosition = Math.min(Math.max(touch.clientX - rect.left, 0), playAreaWidth);
@@ -465,10 +465,37 @@ Events.on(engine, "collisionStart", (event) => {
       const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
       if (fruitIndex < 0) return;
       
-          // スイカ同士の合体の場合は両方消す
+      // スイカ同士の合体の場合は正五角形を生成
       if (fruitIndex === 7) { // fruit8（スイカ）の場合
         World.remove(world, bodyA);
         World.remove(world, bodyB);
+        
+        // 正五角形のサイズとスケールを計算
+        const pentagonSize = fruitSizes[8]; // 正五角形のサイズ
+        const scale = calculateImageScale(8, pentagonSize);
+        
+        // 正五角形の物体を作成
+        const pentagonBody = Bodies.polygon(
+          (bodyA.position.x + bodyB.position.x) / 2,
+          (bodyA.position.y + bodyB.position.y) / 2,
+          5, // 5角形
+          pentagonSize / 2,
+          {
+            render: {
+              sprite: {
+                texture: fruitImages[8], // pentagon.png
+                xScale: scale,
+                yScale: scale,
+              },
+            },
+            restitution: bodyA.restitution,
+            friction: bodyA.friction,
+            density: bodyA.density,
+            fruitIndex: 8 // 正五角形のインデックス
+          }
+        );
+        
+        World.add(world, pentagonBody);
         
         // スイカ同士の合体音を再生
         playSound("watermelon");
@@ -478,7 +505,12 @@ Events.on(engine, "collisionStart", (event) => {
         return;
       }
       
-      const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 1);
+      // 正五角形同士は合体しない
+      if (fruitIndex === 8) { // 正五角形の場合
+        return; // 何もせずに終了
+      }
+      
+      const nextIndex = Math.min(fruitIndex + 1, fruitImages.length - 2); // 正五角形は除外
       const newSize = fruitSizes[nextIndex];
       
       // 画像のスケールを計算
@@ -600,24 +632,5 @@ function resetGame() {
 
   // キャラクターの位置をリセット
   characterPosition = { x: playAreaWidth / 2, y: 20 };
-  updateCharacterPosition(characterPosition.x);
-
-  // 状態リセット
-  activeFruitBody = null;
-  isGameOver = false;
-
-  // ゲームオーバー画面を非表示
-  gameOverScreen.classList.add("hidden");
-
-  // ランキング表示を更新
-  updateRankingDisplay();
-
-  // 新しいフルーツを作成
-  createNewFruit(characterPosition.x);
-  // フルーツが作成された時に次のフルーツ画像を更新
-  updateNextFruitPreview();
-}
-
-// 画像のプリロードを開始
-preloadImages();
+  updateCharacterPosition(characterPosition.
 
