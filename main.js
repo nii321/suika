@@ -473,7 +473,7 @@ Events.on(engine, "collisionStart", (event) => {
         World.remove(world, bodyB);
         
         // 正五角形のサイズをfruit4と同じに設定
-        const pentagonSize = fruitSizes[3]; // fruit4のサイズを使用
+        const pentagonSize = fruitSizes[2]; // fruit4のサイズを使用
         const pentagonRadius = pentagonSize / 2;
         const pentagonVertices = [];
         
@@ -495,8 +495,8 @@ Events.on(engine, "collisionStart", (event) => {
             render: {
               sprite: {
                 texture: "assets/pentagon.png", // 正五角形の画像
-                xScale: calculateImageScale(3, pentagonSize), // fruit4のスケールを適用
-                yScale: calculateImageScale(3, pentagonSize)
+                xScale: calculateImageScale(2, pentagonSize), // fruit4のスケールを適用
+                yScale: calculateImageScale(2, pentagonSize)
               }
             },
             restitution: 0.8,
