@@ -231,7 +231,7 @@ function updateRankingDisplay() {
       
       // 現在のスコアより下位のスコアを表示（5位まで）
       for (let i = currentRank - 1; i < Math.min(5, displayScores.length); i++) {
-        const rank = i + 1;
+        const rank = i + 2;
         const row = document.createElement("tr");
         row.innerHTML = `<td>${rank}位</td><td>${displayScores[i]}</td>`;
         tbody.appendChild(row);
