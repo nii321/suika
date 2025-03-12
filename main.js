@@ -139,6 +139,9 @@ let imagesLoaded = 0;
 let totalImages = fruitImages.length;
 const preloadedImages = [];
 
+// 合体済みのフルーツを追跡する変数
+const processedBodies = new Set();
+
 // キャラクターの追加
 const characterElement = document.createElement("div");
 characterElement.id = "character";
@@ -446,6 +449,9 @@ gameContainer.addEventListener("touchend", () => {
   activeFruitBody = null;
 });
 
+// 合体済みのフルーツを追跡する変数
+const processedBodies = new Set();
+
 // 合体ロジック（同じ種類のフルーツが接触した場合）
 Events.on(engine, "collisionStart", (event) => {
   const pairs = event.pairs;
@@ -461,8 +467,15 @@ Events.on(engine, "collisionStart", (event) => {
     // 両方が正五角形の場合は合体しない
     if (bodyA.isPentagon && bodyB.isPentagon) return;
 
+    // 既に処理済みのフルーツの場合はスキップ
+    if (processedBodies.has(bodyA.id) || processedBodies.has(bodyB.id)) return;
+
     if (bodyA.render.sprite && bodyB.render.sprite && 
         bodyA.render.sprite.texture === bodyB.render.sprite.texture) {
+      // 処理済みとしてマーク
+      processedBodies.add(bodyA.id);
+      processedBodies.add(bodyB.id);
+      
       // 合体処理：次の段階のフルーツに進化させる
       const fruitIndex = fruitImages.indexOf(bodyA.render.sprite.texture);
       if (fruitIndex < 0) return;
@@ -557,6 +570,11 @@ Events.on(engine, "collisionStart", (event) => {
       updateScore(score + (nextIndex + 1) * 10);
     }
   });
+  
+  // 1フレーム後に処理済みセットをクリア
+  setTimeout(() => {
+    processedBodies.clear();
+  }, 0);
 });
 
 // ゲームオーバー判定
