@@ -632,5 +632,23 @@ function resetGame() {
 
   // キャラクターの位置をリセット
   characterPosition = { x: playAreaWidth / 2, y: 20 };
-  updateCharacterPosition(characterPosition.
+  updateCharacterPosition(characterPosition.x);
 
+  // 状態リセット
+  activeFruitBody = null;
+  isGameOver = false;
+
+  // ゲームオーバー画面を非表示
+  gameOverScreen.classList.add("hidden");
+
+  // ランキング表示を更新
+  updateRankingDisplay();
+
+  // 新しいフルーツを作成
+  createNewFruit(characterPosition.x);
+  // フルーツが作成された時に次のフルーツ画像を更新
+  updateNextFruitPreview();
+}
+
+// 画像のプリロードを開始
+preloadImages();
