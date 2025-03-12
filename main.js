@@ -458,7 +458,7 @@ Events.on(engine, "collisionStart", (event) => {
     if (bodyA.isStatic && bodyA !== activeFruitBody) return;
     if (bodyB.isStatic && bodyB !== activeFruitBody) return;
 
-    // もし両方が正五角形なら何もしない
+    // 両方が正五角形の場合は合体しない
     if (bodyA.isPentagon && bodyB.isPentagon) return;
 
     if (bodyA.render.sprite && bodyB.render.sprite && 
