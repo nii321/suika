@@ -1,180 +1,179 @@
 /* 全体のリセット */
 body, html {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-  background-color: #f0f8ff; /* 背景色 */
-  overflow: hidden; /* スクロールバーを非表示 */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff; /* 背景色 */
+    overflow: hidden; /* スクロールバーを非表示 */
 }
 
 /* ゲームコンテナ */
 #game-container {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* スコアボード */
 #score-board {
-  width: 100%;
-  background-color: #ffcc00; /* 黄色背景 */
-  text-align: center;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    width: 100%;
+    background-color: #ffcc00; /* 黄色背景 */
+    text-align: center;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #score-board h1 {
-  margin: 0;
-  font-size: 24px;
+    margin: 0;
+    font-size: 24px;
 }
 
 /* 次のフルーツプレビュー */
 #next-fruit-preview {
-  margin-left: 20px;
-  display: flex;
-  align-items: center;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
 }
 
 #next-fruit-image {
-  width: 30px;
-  height: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 /* プレイエリア */
 #play-area {
-  position: relative;
-  width: calc(100% - 20px);
-  height: calc(100% - 150px);
-  background-color: #ffffff; /* 白色背景 */
-  border-left: none; /* 左側の枠線を一旦削除 */
-  border-right: none; /* 右側の枠線を一旦削除 */
-  border-bottom: solid 2px #000; /* 下側の枠線 */
-  border-top: none; /* 上辺の枠線を削除 */
-  overflow: hidden;
+    position: relative;
+    width: calc(100% - 20px);
+    height: calc(100% - 150px);
+    background-color: #ffffff; /* 白色背景 */
+    border-left: none; /* 左側の枠線を一旦削除 */
+    border-right: none; /* 右側の枠線を一旦削除 */
+    border-bottom: solid 2px #715e58; /* 下側の枠線を木の色に変更 */
+    border-top: none; /* 上辺の枠線を削除 */
+    overflow: hidden;
 }
 
 /* 左右の枠線用の疑似要素 */
 #play-area::before,
 #play-area::after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  background-color: #000;
-  bottom: 0;
-  top: 100px; /* フルーツ作成位置より下から開始 */
+    content: "";
+    position: absolute;
+    width: 2px;
+    background-color: #715e58; /* 左右の枠線を木の色に変更 */
+    bottom: 0;
+    top: 100px; /* フルーツ作成位置より下から開始 */
 }
 
 #play-area::before {
-  left: 0;
+    left: 0;
 }
 
 #play-area::after {
-  right: 0;
+    right: 0;
 }
 
 /* Matter.js のキャンバス */
 canvas {
-  position: absolute;
-  z-index: 1;
+    position: absolute;
+    z-index: 1;
 }
 
 /* フルーツ */
 .fruit {
-  position: absolute;
+    position: absolute;
 }
 
 /* キャラクター */
 #character {
-  position: absolute;
-  z-index: 2;
+    position: absolute;
+    z-index: 2;
 }
 
 #character img {
-  width: 50px;
-  height: auto;
+    width: 50px;
+    height: auto;
 }
 
 /* ゲームオーバー画面 */
 #game-over {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.8); /* 半透明の黒背景 */
-  color: white; /* 白い文字 */
-  padding: 20px;
-  text-align: center;
-  border-radius: 10px; /* 丸みを帯びた角 */
-  z-index: 10;
-  display: flex; /* 表示方法を変更 */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8); /* 半透明の黒背景 */
+    color: white; /* 白い文字 */
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px; /* 丸みを帯びた角 */
+    z-index: 10;
+    display: flex; /* 表示方法を変更 */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #game-over.hidden {
-  display: none;
+    display: none;
 }
 
 #restart-button {
-  padding: 10px 20px;
-  font-size: 18px;
-  color: white;
-  background-color: #ff4500; /* オレンジ色 */
-  border: none;
-  border-radius: 5px; /* ボタンの角を丸くする */
+    padding: 10px 20px;
+    font-size: 18px;
+    color: white;
+    background-color: #ff4500; /* オレンジ色 */
+    border: none;
+    border-radius: 5px; /* ボタンの角を丸くする */
 }
 
 #restart-button:hover {
-   cursor: pointer;
-   background-color: #ff6633;
+    cursor: pointer;
+    background-color: #ff6633;
 }
 
 /* ランキングボード */
 #ranking-board {
-  position: absolute;
-  top: auto;
-  bottom: 70px;
-  left: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 5px;
-  z-index: 5;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  max-width: 200px;
+    position: absolute;
+    top: auto;
+    bottom: 70px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-width: 200px;
 }
 
 #ranking-board h3 {
-  margin: 0 0 10px 0;
-  text-align: center;
-  color: #333;
-  font-size: 16px;
+    margin: 0 0 10px 0;
+    text-align: center;
+    color: #333;
+    font-size: 16px;
 }
 
 #ranking-table {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 #ranking-table td {
-  padding: 5px 10px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
+    padding: 5px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
 }
 
 #ranking-table tr:last-child td {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 #ranking-table tr.highlight {
-  background-color: #ffcc00;
-  font-weight: bold;
+    background-color: #ffcc00;
+    font-weight: bold;
 }
-
