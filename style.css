@@ -140,7 +140,7 @@ canvas {
 #ranking-board {
     position: absolute;
     top: auto;
-    bottom: 70px;
+    bottom: 50px;
     left: 20px;
     background-color: rgba(255, 255, 255, 0.8);
     padding: 10px;
