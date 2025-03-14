@@ -652,3 +652,20 @@ function resetGame() {
 
 // 画像のプリロードを開始
 preloadImages();
+
+// DOMが読み込まれた後に実行
+document.addEventListener('DOMContentLoaded', function() {
+  // ランキングボードとトグルボタンの要素を取得
+  const rankingBoard = document.getElementById('ranking-board');
+  const toggleButton = document.getElementById('toggle-ranking');
+  
+  // ボタンクリックイベントの追加
+  toggleButton.addEventListener('click', function() {
+    // ランキングボードの表示/非表示を切り替え
+    if (rankingBoard.classList.contains('hidden')) {
+      rankingBoard.classList.remove('hidden');
+    } else {
+      rankingBoard.classList.add('hidden');
+    }
+  });
+});
