@@ -177,3 +177,31 @@ canvas {
     background-color: #ffcc00;
     font-weight: bold;
 }
+#score-board {
+  width: 100%;
+  background-color: #ffcc00;
+  text-align: center;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#toggle-ranking {
+  margin-right: 20px;
+  padding: 5px 10px;
+  background-color: #ff4500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#toggle-ranking:hover {
+  background-color: #ff6633;
+}
+
+/* ランキングボードの非表示クラス */
+.hidden {
+  display: none !important;
+}
